@@ -207,9 +207,12 @@ export class FakeDbConnection implements DbConnection {
     }
 
     const pk = PRIMARY_KEYS[table] ?? [];
+    // Only check PK conflict when the row actually carries the PK columns
+    // (autoincrement tables omit `id` from the INSERT column list).
+    const pkOnRow = pk.length > 0 && pk.every((col) => row[col] !== undefined);
     const sameKey = (a: Row, b: Row): boolean =>
-      pk.length > 0 && pk.every((col) => a[col] === b[col]);
-    const existingIdx = pk.length > 0 ? list.findIndex((r) => sameKey(r, row)) : -1;
+      pkOnRow && pk.every((col) => a[col] === b[col]);
+    const existingIdx = pkOnRow ? list.findIndex((r) => sameKey(r, row)) : -1;
 
     if (isIgnore && existingIdx >= 0) {
       return { changes: { changes: 0 }, rows: [] };

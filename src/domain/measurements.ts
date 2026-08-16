@@ -108,6 +108,124 @@ export function formatHeight(cm: number, system: MeasurementSystem): string {
   return `${feet}′${inches.toFixed(1)}″`;
 }
 
+/**
+ * Format a barbell/load weight for display in the user's preferred system.
+ *
+ *   metric   → `"72.5 kg"`
+ *   imperial → `"154.3 lb"`
+ *   null     → `"—"`     (no load — bodyweight, ab crunch, plank, ...)
+ *
+ * Defaults to 1 fractional digit. Canonical store is kg; imperial rendering
+ * converts at the edge only.
+ */
+export function formatLoad(
+  kg: number | null,
+  system: MeasurementSystem,
+  fractionDigits: number = 1,
+): string {
+  if (kg === null) return '—';
+  if (system === 'metric') {
+    return `${kg.toFixed(fractionDigits)} kg`;
+  }
+  return `${kgToLb(kg).toFixed(fractionDigits)} lb`;
+}
+
+/**
+ * Parse a user-typed load string into canonical kg.
+ *
+ * Accepts locale-shaped entries like:
+ *   - `"72,5"`         → 72.5 kg  (PT/ES comma decimal)
+ *   - `"72.5"`         → 72.5 kg  (en/US dot decimal)
+ *   - `"154,3 lb"`     → 69.98 kg (stripped + converted)
+ *   - `"1,234"`        → 1234 kg  (3 digits after comma → thousands)
+ *   - `"1.234"`        → 1234 kg  (3 digits after dot  → thousands)
+ *   - `"1,234.5"`      → 1234.5   (dot is decimal; commas are thousands)
+ *   - `"1.234,5"`      → 1234.5   (comma is decimal; dots are thousands)
+ *
+ * Returns `null` on empty input, unparseable input, or input that strips
+ * down to no numeric characters.
+ */
+export function parseLoadInputToKg(raw: string, system: MeasurementSystem): number | null {
+  if (typeof raw !== 'string') return null;
+  // Strip everything except digits, separators and minus.
+  const cleaned = raw.replace(/[^0-9.,-]/g, '');
+  if (cleaned.length === 0) return null;
+
+  const normalized = normaliseNumericSeparators(cleaned);
+  if (normalized === null) return null;
+
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed)) return null;
+
+  return system === 'imperial' ? lbToKg(parsed) : parsed;
+}
+
+/**
+ * Apply the locale-separator disambiguation rules and produce a normalized
+ * number string using `.` as the decimal separator.
+ *
+ * Rules (in order):
+ *  1. No separators → return as-is.
+ *  2. Both `,` and `.` present → whichever appears LAST is the decimal
+ *     separator; the other one is treated as a thousands separator and
+ *     removed. `"1,234.5"` → `"1234.5"`, `"1.234,5"` → `"1234.5"`.
+ *  3. Exactly one separator present AND exactly 3 digits follow it → treat
+ *     as thousands separator and remove. `"1,234"` → `"1234"`, `"1.234"`
+ *     → `"1234"`.
+ *  4. Otherwise the single separator is a decimal → replace `,` with `.`
+ *     (`.` is already canonical). `"72,5"` → `"72.5"`, `"72.5"` → `"72.5"`.
+ *
+ * Returns `null` when the result is empty or unparseable.
+ */
+function normaliseNumericSeparators(input: string): string | null {
+  const hasComma = input.includes(',');
+  const hasDot = input.includes('.');
+
+  if (!hasComma && !hasDot) {
+    return input.length > 0 ? input : null;
+  }
+
+  if (hasComma && hasDot) {
+    const lastComma = input.lastIndexOf(',');
+    const lastDot = input.lastIndexOf('.');
+    if (lastComma > lastDot) {
+      // Comma is the decimal; dots are thousands separators.
+      const withoutDots = input.replace(/\./g, '');
+      return replaceLastCommaWithDot(withoutDots);
+    }
+    // Dot is the decimal; commas are thousands separators.
+    return input.replace(/,/g, '');
+  }
+
+  // Exactly one separator.
+  const sep = hasComma ? ',' : '.';
+  const idx = input.lastIndexOf(sep);
+  const after = input.substring(idx + 1);
+  if (after.length === 3) {
+    // Thousands separator: strip it.
+    return input.substring(0, idx) + input.substring(idx + 1);
+  }
+  // Decimal separator: ensure `.` (commas become dots; dots stay).
+  if (sep === ',') {
+    return replaceLastCommaWithDot(input);
+  }
+  return input;
+}
+
+/**
+ * Replace the final `,` in `input` with `.` and drop any other commas (which
+ * would otherwise confuse the JS number parser). Returns `null` if there is
+ * no comma to replace.
+ */
+function replaceLastCommaWithDot(input: string): string | null {
+  const idx = input.lastIndexOf(',');
+  if (idx === -1) return null;
+  const before = input.substring(0, idx).replace(/,/g, '');
+  const after = input.substring(idx + 1).replace(/,/g, '');
+  const out = `${before}.${after}`;
+  return out.length > 0 ? out : null;
+}
+
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }

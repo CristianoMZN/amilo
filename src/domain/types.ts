@@ -234,3 +234,181 @@ export interface NutritionTargets {
   fatGTarget: number;
   updatedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Sprint 3 — Exercises & Workouts
+// ---------------------------------------------------------------------------
+
+/** Provenance of an exercise. Official = bundled catalog, custom = user-created. */
+export type ExerciseOrigin = 'official' | 'custom';
+
+/** Whether the exercise is primarily cardio (aerobic) or resistance (strength). */
+export type ExerciseKind = 'aerobic' | 'strength';
+
+/** Canonical muscle group for strength exercises. Nullable for aerobic. */
+export type MuscleGroup =
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'biceps'
+  | 'triceps'
+  | 'legs'
+  | 'glutes'
+  | 'calves'
+  | 'core'
+  | 'lower_back'
+  | 'full_body'
+  | 'other';
+
+/**
+ * What kind of weight, if any, an exercise uses.
+ * - `kg` / `lb`: external load, always required when sets are recorded
+ * - `bodyweight`: load is allowed but optional (e.g. weighted pull-up)
+ * - `none`: load not applicable (e.g. push-up, plank, ab crunch)
+ */
+export type ExerciseDefaultUnit = 'kg' | 'lb' | 'bodyweight' | 'none';
+
+/**
+ * A reusable exercise (aerobic or strength). IDs are stable, semantic slugs:
+ *   - official: 'exercise:walking', 'exercise:barbell_bench_press', …
+ *   - custom:   'exercise:user:<uuid>'
+ */
+export interface Exercise {
+  id: string;
+  origin: ExerciseOrigin;
+  kind: ExerciseKind;
+  muscleGroup: MuscleGroup | null;
+  defaultUnit: ExerciseDefaultUnit;
+  /** Whether the exercise is recorded by repetitions (most strength). */
+  hasRepetitions: boolean;
+  /** Whether the exercise is recorded by duration (most aerobic). */
+  hasDuration: boolean;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Per-locale display name + diacritic-insensitive search blob. */
+export interface ExerciseTranslation {
+  exerciseId: string;
+  locale: SupportedLocale;
+  name: string;
+  search: string;
+}
+
+/** Per-aerobic-exercise kcal-per-hour estimate. */
+export interface ExerciseAerobicMeta {
+  exerciseId: string;
+  kcalPerHour: number;
+}
+
+/**
+ * A logged aerobic session. Snapshot fields preserve history even if the
+ * parent exercise's kcal/h changes or the exercise is deleted.
+ */
+export interface AerobicActivity {
+  id: number;
+  refDate: string; // local YYYY-MM-DD
+  exerciseId: string | null;
+  exerciseNameSnapshot: string;
+  kcalPerHourSnapshot: number;
+  durationMinutes: number;
+  kcalEstimated: number;
+  notes: string | null;
+  createdAt: string;
+}
+
+/** A favorite aerobic exercise. Reuses food_favorite pattern. */
+export interface AerobicFavorite {
+  exerciseId: string;
+  createdAt: string;
+}
+
+/** A workout routine (a "plan"). */
+export interface WorkoutSheet {
+  id: number;
+  name: string;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A division/session of a sheet. Free-form name — no A/B/C enforcement.
+ * (e.g. "Peito + tríceps", "Costas + bíceps", "Pernas").
+ */
+export interface WorkoutSession {
+  id: number;
+  sheetId: number;
+  name: string;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A planned exercise inside a session. Snapshot fields preserve history
+ * even if the parent exercise is renamed or deleted.
+ */
+export interface WorkoutPlannedExercise {
+  id: number;
+  sessionId: number;
+  exerciseId: string | null;
+  exerciseNameSnapshot: string;
+  muscleGroupSnapshot: MuscleGroup | null;
+  position: number;
+  plannedSets: number;
+  plannedReps: number;
+  /** Canonical kg; null if the exercise doesn't use external load. */
+  plannedWeightKg: number | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+/** Status of a performed workout (lifecycle state). */
+export type PerformedWorkoutStatus = 'in_progress' | 'completed' | 'abandoned';
+
+/**
+ * An actual workout execution, independent of the sheet (snapshots preserve
+ * history if the sheet/session/exercise is renamed or deleted).
+ */
+export interface PerformedWorkout {
+  id: number;
+  refDate: string;
+  sheetId: number | null;
+  sessionId: number | null;
+  sheetNameSnapshot: string;
+  sessionNameSnapshot: string;
+  status: PerformedWorkoutStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Exercise within a performed workout. Snapshot the name + muscle group. */
+export interface PerformedWorkoutExercise {
+  id: number;
+  performedWorkoutId: number;
+  exerciseId: string | null;
+  exerciseNameSnapshot: string;
+  muscleGroupSnapshot: MuscleGroup | null;
+  position: number;
+  createdAt: string;
+}
+
+/**
+ * A single performed set (series). Weight stored in canonical kg; null when
+ * the exercise uses no load. `reps` is REAL so partial reps (e.g. paused reps)
+ * can be expressed; UI defaults to integer steps.
+ */
+export interface PerformedWorkoutSet {
+  id: number;
+  performedExerciseId: number;
+  position: number;
+  reps: number;
+  weightKg: number | null;
+  completed: boolean;
+  createdAt: string;
+}

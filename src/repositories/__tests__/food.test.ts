@@ -1,13 +1,14 @@
-// Lightweight tests for the food + foodTranslation repos over the dev stub.
-//
-// The dev stub does not model `INSERT ... ON CONFLICT ... DO UPDATE`.
-// The `insertFood` and `upsertFoodTranslation` upserts are exercised on
-// the native engine; the read paths below are covered with direct
-// seeds (which let the stub auto-assign the synthetic `id`).
+// Lightweight tests for the food + foodTranslation repos. They use the
+// `FakeDbConnection` (see `./fakeConnection`) so the SQL patterns the
+// repos actually emit — `INSERT … ON CONFLICT … DO UPDATE`, `UPDATE`,
+// `DELETE`, `WHERE … = ?`, `LIKE` — are all honoured. Tests that would
+// require JOIN / GROUP BY / LIMIT are skipped with documentation.
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+  deleteFood,
   findFoodById,
+  insertFood,
   listAllOfficialFoodIds,
   listCustomFoods,
   listFoods,
@@ -19,7 +20,9 @@ import {
   findAnyTranslation,
   findFoodTranslation,
   listTranslationsForFood,
+  upsertFoodTranslation,
 } from 'src/repositories/foodTranslation';
+import { normalizeForSearch } from 'src/util/search';
 import {
   createTestDb,
   insertFoodRow,
@@ -150,22 +153,53 @@ describe('food repo', () => {
 
   it('updateFood rewrites every mutable column', async () => {
     await seedFood(db, OFFICIAL_RICE);
-    const updated = { ...OFFICIAL_RICE, kcal: 999, updatedAt: '2026-06-01T00:00:00.000Z' };
+    const before = Date.now();
+    const updated = { ...OFFICIAL_RICE, kcal: 999 };
     await updateFood(db.conn, updated);
     const result = await findFoodById(db.conn, 'food:rice_white');
     expect(result?.kcal).toBe(999);
-    expect(result?.updatedAt).toBe('2026-06-01T00:00:00.000Z');
+    // `updateFood` always refreshes `updated_at` to the current time.
+    const after = Date.now();
+    const updatedAt = Date.parse(result?.updatedAt ?? '');
+    expect(updatedAt).toBeGreaterThanOrEqual(before);
+    expect(updatedAt).toBeLessThanOrEqual(after);
   });
 
-  // SKIP: insertFood uses `INSERT ... ON CONFLICT(id) DO UPDATE`, which
-  // the dev stub does not model. The native engine handles the upsert.
-  it.skip('insertFood upserts a new row', async () => {
-    // Placeholder — see the JSDoc on `food.ts`.
+  it('insertFood upserts a new row by id', async () => {
+    const result = await insertFood(db.conn, { ...OFFICIAL_RICE });
+    expect(result.id).toBe(OFFICIAL_RICE.id);
+    const fetched = await findFoodById(db.conn, OFFICIAL_RICE.id);
+    expect(fetched?.kcal).toBe(130);
   });
 
-  // SKIP: deleteFood runs DELETE cascaded by the dev stub. Tested on-device.
-  it.skip('deleteFood cascades to food_translation', async () => {
-    // Placeholder.
+  it('insertFood overwrites an existing row by id (ON CONFLICT DO UPDATE)', async () => {
+    await seedFood(db, OFFICIAL_RICE);
+    const before = await findFoodById(db.conn, OFFICIAL_RICE.id);
+    await insertFood(db.conn, { ...OFFICIAL_RICE, kcal: 999 });
+    const after = await findFoodById(db.conn, OFFICIAL_RICE.id);
+    expect(after?.kcal).toBe(999);
+    // createdAt stays put; updatedAt is refreshed by the repo.
+    expect(after?.createdAt).toBe(before?.createdAt);
+    expect(after?.updatedAt).not.toBe(before?.updatedAt);
+  });
+
+  it('deleteFood nulls out meal_item.food_id before removing the row', async () => {
+    await seedFood(db, OFFICIAL_RICE);
+    // Pre-seed a meal_item referencing this food so we can verify the
+    // dangling-FK cleanup pass runs.
+    await db.exec(
+      `INSERT INTO meal_item
+         (meal_id, position, food_id, food_name_snapshot, amount_g, unit,
+          kcal_snapshot, protein_g_snapshot, carbs_g_snapshot, fat_g_snapshot, fiber_g_snapshot, created_at)
+       VALUES (1, 0, ?, 'Rice', 100, 'g', 130, 2.7, 28, 0.3, 0.4, '2026-01-01T00:00:00.000Z')`,
+      ['food:rice_white'],
+    );
+    await deleteFood(db.conn, 'food:rice_white');
+    expect(await findFoodById(db.conn, 'food:rice_white')).toBeNull();
+    const items = await db.query<{ food_id: string | null }>(
+      'SELECT food_id FROM meal_item WHERE food_id IS NULL',
+    );
+    expect(items.length).toBeGreaterThan(0);
   });
 });
 
@@ -205,9 +239,17 @@ describe('foodTranslation repo', () => {
     expect(translations.map((t) => t.locale).sort()).toEqual(['en', 'pt-BR']);
   });
 
-  // SKIP: upsertFoodTranslation uses `INSERT ... ON CONFLICT(food_id, locale)
-  // DO UPDATE`, which the dev stub does not model.
-  it.skip('upsertFoodTranslation updates the name on conflict', async () => {
-    // Placeholder.
+  it('upsertFoodTranslation inserts then updates on conflict', async () => {
+    await seedFood(db, OFFICIAL_RICE);
+    await upsertFoodTranslation(db.conn, {
+      foodId: 'food:rice_white',
+      locale: 'en',
+      name: 'White rice (cooked)',
+      search: '',
+    });
+    const after = await findFoodTranslation(db.conn, 'food:rice_white', 'en');
+    expect(after?.name).toBe('White rice (cooked)');
+    // `search` falls back to normalizeForSearch(name) when empty.
+    expect(after?.search).toBe(normalizeForSearch('White rice (cooked)'));
   });
 });

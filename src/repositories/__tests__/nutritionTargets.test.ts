@@ -1,16 +1,15 @@
-// Lightweight tests for `nutritionTargets` over the dev stub.
-//
-// The dev stub does not model `INSERT ... ON CONFLICT(id) DO UPDATE` —
-// see the JSDoc at the top of `nutritionTargets.ts`. The native codepath
-// is exercised on-device. The test here only verifies the read path
-// (findNutritionTargets) by seeding the row directly with `INSERT OR
-// IGNORE`, which the stub does support.
+// Lightweight tests for `nutritionTargets`. They use the FakeDbConnection
+// in `./fakeConnection.ts`, so `INSERT ... ON CONFLICT(id) DO UPDATE` is
+// exercised end-to-end (the dev stub does not model that clause).
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { findNutritionTargets } from 'src/repositories/nutritionTargets';
+import {
+  findNutritionTargets,
+  upsertNutritionTargets,
+} from 'src/repositories/nutritionTargets';
+import { nowIso } from 'src/util/dateDay';
 import {
   createTestDb,
-  insertNutritionTargetsRow,
   type TestDb,
 } from './testDb';
 
@@ -28,15 +27,15 @@ describe('nutritionTargets repo', () => {
     expect(result).toBeNull();
   });
 
-  it('findNutritionTargets returns the row when seeded', async () => {
-    await insertNutritionTargetsRow(
-      db,
-      2000,
-      120,
-      220,
-      60,
-      '2026-08-16T10:00:00.000Z',
-    );
+  it('upsertNutritionTargets inserts when missing', async () => {
+    await upsertNutritionTargets(db.conn, {
+      id: 1,
+      kcalTarget: 2000,
+      proteinGTarget: 120,
+      carbsGTarget: 220,
+      fatGTarget: 60,
+      updatedAt: '2026-08-16T10:00:00.000Z',
+    });
     const result = await findNutritionTargets(db.conn);
     expect(result).toEqual({
       id: 1,
@@ -48,10 +47,28 @@ describe('nutritionTargets repo', () => {
     });
   });
 
-  // SKIP: upsertNutritionTargets uses `INSERT ... ON CONFLICT(id) DO UPDATE`,
-  // which the dev stub does not model. The native engine handles the
-  // upsert correctly; verification happens on-device.
-  it.skip('upsertNutritionTargets inserts when missing', async () => {
-    // Placeholder — see JSDoc above.
+  it('upsertNutritionTargets overwrites existing targets (ON CONFLICT DO UPDATE)', async () => {
+    await upsertNutritionTargets(db.conn, {
+      id: 1,
+      kcalTarget: 2000,
+      proteinGTarget: 120,
+      carbsGTarget: 220,
+      fatGTarget: 60,
+      updatedAt: '2026-08-16T10:00:00.000Z',
+    });
+    await upsertNutritionTargets(db.conn, {
+      id: 1,
+      kcalTarget: 1800,
+      proteinGTarget: 130,
+      carbsGTarget: 200,
+      fatGTarget: 55,
+      updatedAt: nowIso(),
+    });
+    const result = await findNutritionTargets(db.conn);
+    expect(result?.kcalTarget).toBe(1800);
+    expect(result?.proteinGTarget).toBe(130);
+    // Id is a singleton — only one row.
+    const rows = await db.query<unknown>('SELECT * FROM nutrition_targets');
+    expect(rows).toHaveLength(1);
   });
 });
