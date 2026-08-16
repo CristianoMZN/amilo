@@ -1,0 +1,46 @@
+// app global css
+
+// Make every Quasar page honour the safe areas on mobile (Android notch).
+.q-layout,
+.q-page {
+  background: var(--amilio-bg-light);
+}
+
+.body--dark .q-layout,
+.body--dark .q-page {
+  background: var(--amilio-black);
+}
+
+// Disable iOS / Android tap highlight flash that overlays brand yellow.
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Ensure default text colour respects the theme.
+body {
+  color: var(--amilio-text-dark);
+  font-family: 'Roboto', 'Noto Sans', 'Noto Sans JP', 'Noto Sans KR', system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.body--dark {
+  color: var(--amilio-text-light);
+}
+
+// Focus ring for keyboard / a11y — keeps it visible without breaking the brand.
+:focus-visible {
+  outline: 2px solid var(--amilio-yellow-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Larger touch targets for mobile forms (a11y).
+.amilio-touch {
+  min-height: 48px;
+}
+
+// Numeric inputs use a larger, monospaced-friendly font for clarity.
+.amilio-numeric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}

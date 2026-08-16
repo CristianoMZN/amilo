@@ -1,0 +1,16 @@
+{
+  "name": "amilio",
+  "version": "0.0.1",
+  "description": "A Quasar Project",
+  "author": "Cristiano Mozena <past.kun@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "jeep-sqlite": "^2.8.0",
+    "sql.js": "^1.14.2"
+  }
+}
