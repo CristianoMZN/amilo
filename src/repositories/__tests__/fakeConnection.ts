@@ -197,8 +197,11 @@ export class FakeDbConnection implements DbConnection {
     // Auto-assign id for tables that use INTEGER PRIMARY KEY AUTOINCREMENT.
     // The repos bind `id` only when the schema sets it explicitly (e.g.
     // `food.id` TEXT, `nutrition_targets.id` = 1). For autoincrement tables
-    // the repos omit `id` from the column list altogether.
-    if (cols[0] === 'id' && (row['id'] === undefined || row['id'] === null)) {
+    // the repos omit `id` from the column list altogether, so we check
+    // both the table's known columns and the column list.
+    const hasIdColumn = STUB_COLUMNS[table]?.[0] === 'id';
+    const idIncluded = cols[0] === 'id';
+    if (hasIdColumn && !idIncluded && (row['id'] === undefined || row['id'] === null)) {
       if (SEQUENCE_TABLES.has(table)) {
         const next = (sequences[table] ?? 0) + 1;
         row['id'] = next;
