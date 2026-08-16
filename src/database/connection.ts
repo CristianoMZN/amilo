@@ -226,6 +226,24 @@ const CASCADE_DELETE: Readonly<Record<string, readonly string[]>> = {
   performed_workout_exercise: ['performed_workout_set'],
 };
 
+/**
+ * Tables whose first column is `INTEGER PRIMARY KEY AUTOINCREMENT` and
+ * therefore need the dev stub to auto-assign a fresh id when the caller
+ * doesn't supply one. Tables NOT in this set have either a non-autoincrement
+ * primary key (`food` / `food_favorite` / `meal_type` — caller passes id),
+ * a composite primary key (`food_translation` / `meal_type_translation`),
+ * or a singleton id=1 row (`user_profile` / `user_preferences` /
+ * `nutrition_targets` — caller passes id = 1).
+ */
+const STUB_AUTOINCREMENT_PRIMARY: ReadonlySet<string> = new Set([
+  'weight_entry',
+  'meal',
+  'meal_item',
+  'saved_meal',
+  'saved_meal_item',
+  'aerobic_activity',
+]);
+
 class NativeConnection implements DbConnection {
   private readonly conn: SQLiteConnection;
 
@@ -332,11 +350,16 @@ class DevStubConnection implements DbConnection {
       const cols = STUB_COLUMNS[table];
       if (!cols) return { changes: { changes: 1 }, rows: [] };
       const list = tables.get(table) ?? [];
-      const setRow = mapValuesToRow(values, cols);
+      // Whether column 0 (= `id`) should be mapped from the params array.
+      // Autoincrement tables need to skip col 0 because the caller never
+      // supplies an id; everything else (singletons + non-auto primary
+      // keys) passes an id parameter.
+      const isAutoId = STUB_AUTOINCREMENT_PRIMARY.has(table);
+      const setRow = mapValuesToRow(values, cols, !isAutoId);
       // For IGNORE with a unique-key conflict (here, food.id is the primary
       // key), we look for an existing row matching the same primary key and
       // skip the insert.
-      if (replacement === 'ignore') {
+      if (replacement === 'ignore' && !isAutoId) {
         const pk = cols[0];
         if (pk && setRow[pk] !== undefined) {
           const existing = list.find((r) => r[pk] === setRow[pk]);
@@ -344,10 +367,9 @@ class DevStubConnection implements DbConnection {
         }
       }
       const row = setRow;
-      // Assign autoincrement id when (a) the table has an `id` column and
-      // (b) the caller did not provide one.
+      // Assign autoincrement id only when the table actually auto-increments
+      // and the caller didn't supply one.
       const lastId = autoincrement.get(table) ?? 0;
-      const isAutoId = cols[0] === 'id';
       if (isAutoId && (row['id'] === undefined || row['id'] === null)) {
         const next = lastId + 1;
         row['id'] = next;
@@ -505,6 +527,28 @@ function detectInsertConflict(upper: string): 'ignore' | 'replace' | null {
   if (/\bINSERT\s+OR\s+IGNORE\b/.test(upper)) return 'ignore';
   if (/\bINSERT\s+OR\s+ABORT\b/.test(upper)) return 'ignore';
   return null;
+}
+
+/**
+ * For an UPDATE/DELETE statement, return how many `?` placeholders belong
+ * to the SET clause (which sits between `UPDATE table` and `WHERE`). The
+ * WHERE-clause values follow those SET placeholders.
+ */
+function countPlaceholdersBeforeWhere(stmt: string): number {
+  // Walk the SET clause up to the first `WHERE`.
+  const idx = stmt.toUpperCase().indexOf('WHERE');
+  if (idx < 0) return 0;
+  const head = stmt.slice(0, idx);
+  // Count `?` not inside string literals (best-effort — repos don't embed
+  // `?` literals in SQL strings, so this works for our schema).
+  let count = 0;
+  let inString = false;
+  for (let i = 0; i < head.length; i++) {
+    const ch = head[i];
+    if (ch === "'") inString = !inString;
+    else if (ch === '?' && !inString) count++;
+  }
+  return count;
 }
 
 /**

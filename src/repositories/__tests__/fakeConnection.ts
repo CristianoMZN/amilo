@@ -402,8 +402,10 @@ function evaluateCondition(
   const lowerMatch = /^\s*LOWER\s*\(\s*(\w+)\s*\)\s*=\s*LOWER\s*\(\s*\?\s*\)\s*$/i.exec(cond);
   if (lowerMatch) {
     const col = (lowerMatch[1] ?? '').toLowerCase();
-    const target = String(nextParam() ?? '').toLowerCase();
-    return String(row[col] ?? '').toLowerCase() === target;
+    const raw = nextParam();
+    const target = `${raw ?? ''}`.toLowerCase();
+    const rowStr = `${row[col] ?? ''}`.toLowerCase();
+    return rowStr === target;
   }
   // BETWEEN ? AND ?
   const between = /^\s*(\w+)\s+BETWEEN\s+\?\s+AND\s+\?\s*$/i.exec(cond);
@@ -429,9 +431,10 @@ function evaluateCondition(
   if (like) {
     const col = (like[1] ?? '').toLowerCase();
     const raw = like[2] ?? '';
-    const pattern = raw === '?' ? String(nextParam()) : raw.slice(1, -1);
-    const re = new RegExp('^' + pattern.replace(/%/g, '.*').replace(/_/g, '.') + '$');
-    return re.test(String(row[col] ?? ''));
+    const patternSource = raw === '?' ? nextParam() : raw.slice(1, -1);
+    const pattern = `${patternSource ?? ''}`.replace(/%/g, '.*').replace(/_/g, '.');
+    const re = new RegExp(`^${pattern}$`);
+    return re.test(`${row[col] ?? ''}`);
   }
   // col = ? / col = <literal>
   const cmp = /^\s*(\w+)\s*(=|<>|!=|<=|>=|<|>)\s*(\?|\d+|'[^']*')\s*$/i.exec(cond);
