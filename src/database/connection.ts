@@ -396,9 +396,13 @@ class DevStubConnection implements DbConnection {
       const setValues = idParam === null ? values : values.slice(0, -1);
       const setRow = mapValuesToRow(setValues, cols, /* includeAuto */ true);
       const list = tables.get(table) ?? [];
+      // Split SET / WHERE values. `matchesWhere` reads from the start of
+      // its values array, so we hand it just the WHERE-clause slice.
+      const whereOffset = countPlaceholdersBeforeWhere(statement);
+      const whereValues = values.slice(whereOffset);
       let updated = 0;
       for (const row of list) {
-        const matchesAll = matchesWhere(row, statement, values);
+        const matchesAll = matchesWhere(row, statement, whereValues);
         if (!matchesAll) continue;
         for (const [k, v] of Object.entries(setRow)) {
           if (v !== undefined) row[k] = v;
@@ -412,10 +416,12 @@ class DevStubConnection implements DbConnection {
       const table = matchTableName(statement, 'FROM');
       if (!table) return { changes: { changes: 0 }, rows: [] };
       const list = tables.get(table) ?? [];
+      const whereOffset = countPlaceholdersBeforeWhere(statement);
+      const whereValues = values.slice(whereOffset);
       const keep: RowValues[] = [];
       let removed = 0;
       for (const row of list) {
-        if (matchesWhere(row, statement, values)) {
+        if (matchesWhere(row, statement, whereValues)) {
           removed++;
           // Manual cascade for the dev stub.
           const cascade = CASCADE_DELETE[table];

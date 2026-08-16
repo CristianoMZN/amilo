@@ -403,8 +403,11 @@ function evaluateCondition(
   if (lowerMatch) {
     const col = (lowerMatch[1] ?? '').toLowerCase();
     const raw = nextParam();
-    const target = `${raw ?? ''}`.toLowerCase();
-    const rowStr = `${row[col] ?? ''}`.toLowerCase();
+    const rawStr: string = typeof raw === 'string' ? raw : raw == null ? '' : (raw as string);
+    const target = rawStr.toLowerCase();
+    const cell = row[col];
+    const cellStr: string = typeof cell === 'string' ? cell : cell == null ? '' : (cell as string);
+    const rowStr = cellStr.toLowerCase();
     return rowStr === target;
   }
   // BETWEEN ? AND ?
@@ -432,9 +435,17 @@ function evaluateCondition(
     const col = (like[1] ?? '').toLowerCase();
     const raw = like[2] ?? '';
     const patternSource = raw === '?' ? nextParam() : raw.slice(1, -1);
-    const pattern = `${patternSource ?? ''}`.replace(/%/g, '.*').replace(/_/g, '.');
+    const patternSourceStr: string =
+      typeof patternSource === 'string'
+        ? patternSource
+        : patternSource == null
+          ? ''
+          : (patternSource as string);
+    const pattern = patternSourceStr.replace(/%/g, '.*').replace(/_/g, '.');
     const re = new RegExp(`^${pattern}$`);
-    return re.test(`${row[col] ?? ''}`);
+    const cell = row[col];
+    const cellStr: string = typeof cell === 'string' ? cell : cell == null ? '' : (cell as string);
+    return re.test(cellStr);
   }
   // col = ? / col = <literal>
   const cmp = /^\s*(\w+)\s*(=|<>|!=|<=|>=|<|>)\s*(\?|\d+|'[^']*')\s*$/i.exec(cond);

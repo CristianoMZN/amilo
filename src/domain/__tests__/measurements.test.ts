@@ -10,6 +10,7 @@ import {
   flOzToMl,
   ftInToCm,
   formatHeight,
+  formatLoad,
   formatWeight,
   gramsToOz,
   inchesToCm,
@@ -17,6 +18,7 @@ import {
   lbToKg,
   mlToFlOz,
   ozToGrams,
+  parseLoadInputToKg,
 } from 'src/domain/measurements';
 
 describe('kg ↔ lb', () => {
@@ -139,5 +141,88 @@ describe('ml ↔ fl oz (US)', () => {
     expect(flOzToMl(0)).toBe(0);
     // 200 ml ≈ 6.7628 fl oz
     expect(mlToFlOz(200)).toBeCloseTo(6.7628, 3);
+  });
+});
+
+describe('formatLoad', () => {
+  it('renders metric with kg', () => {
+    expect(formatLoad(72.5, 'metric')).toBe('72.5 kg');
+  });
+
+  it('renders imperial with lb (canonical kg → lb)', () => {
+    // 70 kg / 0.45359237 ≈ 154.32308… → toFixed(1) = "154.3"
+    expect(formatLoad(70, 'imperial')).toBe('154.3 lb');
+  });
+
+  it('returns the em-dash placeholder when the weight is null', () => {
+    expect(formatLoad(null, 'metric')).toBe('—');
+    expect(formatLoad(null, 'imperial')).toBe('—');
+  });
+
+  it('respects custom fractionDigits', () => {
+    expect(formatLoad(72.5, 'metric', 2)).toBe('72.50 kg');
+    expect(formatLoad(72.5, 'imperial', 0)).toBe('160 lb');
+  });
+});
+
+describe('parseLoadInputToKg', () => {
+  it('parses pt-BR comma-decimal in metric', () => {
+    expect(parseLoadInputToKg('72,5', 'metric')).toBe(72.5);
+  });
+
+  it('parses en dot-decimal and converts to kg when imperial', () => {
+    // 72.5 lb × 0.45359237 ≈ 32.886
+    expect(parseLoadInputToKg('72.5', 'imperial')).toBeCloseTo(72.5 * KG_PER_LB, 2);
+    expect(parseLoadInputToKg('72.5', 'imperial')).toBeCloseTo(32.886, 2);
+  });
+
+  it('keeps en dot-decimal verbatim in metric', () => {
+    expect(parseLoadInputToKg('72.5', 'metric')).toBe(72.5);
+  });
+
+  it('treats a single comma with exactly 3 digits as a thousands separator', () => {
+    expect(parseLoadInputToKg('1,234', 'metric')).toBe(1234);
+  });
+
+  it('treats a single dot with exactly 3 digits as a thousands separator', () => {
+    expect(parseLoadInputToKg('1.234', 'metric')).toBe(1234);
+  });
+
+  it('handles US-style thousands + decimal: "1,234.5"', () => {
+    expect(parseLoadInputToKg('1,234.5', 'metric')).toBe(1234.5);
+  });
+
+  it('handles EU-style thousands + decimal: "1.234,5"', () => {
+    expect(parseLoadInputToKg('1.234,5', 'metric')).toBe(1234.5);
+  });
+
+  it('strips trailing units like "lb"', () => {
+    // "154,3 lb" → "154,3" → decimal → 154.3 (interpreted in user system)
+    expect(parseLoadInputToKg('154,3 lb', 'metric')).toBe(154.3);
+    // imperial: 154.3 lb × 0.45359237 ≈ 69.98 kg
+    expect(parseLoadInputToKg('154,3 lb', 'imperial')).toBeCloseTo(69.98, 2);
+  });
+
+  it('parses zero', () => {
+    expect(parseLoadInputToKg('0', 'metric')).toBe(0);
+    expect(parseLoadInputToKg('0,0', 'metric')).toBe(0);
+  });
+
+  it('returns null for empty input', () => {
+    expect(parseLoadInputToKg('', 'metric')).toBeNull();
+    expect(parseLoadInputToKg('   ', 'metric')).toBeNull();
+  });
+
+  it('returns null for unparseable input', () => {
+    expect(parseLoadInputToKg('abc', 'metric')).toBeNull();
+    expect(parseLoadInputToKg('--', 'metric')).toBeNull();
+    expect(parseLoadInputToKg('.', 'metric')).toBeNull();
+    expect(parseLoadInputToKg(',', 'metric')).toBeNull();
+  });
+
+  it('returns null for a non-string input', () => {
+    expect(parseLoadInputToKg(null as unknown as string, 'metric')).toBeNull();
+    expect(parseLoadInputToKg(undefined as unknown as string, 'metric')).toBeNull();
+    expect(parseLoadInputToKg(123 as unknown as string, 'metric')).toBeNull();
   });
 });
