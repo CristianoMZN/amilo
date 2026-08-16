@@ -199,8 +199,8 @@ describe('parseLoadInputToKg', () => {
   it('strips trailing units like "lb"', () => {
     // "154,3 lb" → "154,3" → decimal → 154.3 (interpreted in user system)
     expect(parseLoadInputToKg('154,3 lb', 'metric')).toBe(154.3);
-    // imperial: 154.3 lb × 0.45359237 ≈ 69.98 kg
-    expect(parseLoadInputToKg('154,3 lb', 'imperial')).toBeCloseTo(69.98, 2);
+    // imperial: 154.3 lb × 0.45359237 ≈ 69.9893 kg
+    expect(parseLoadInputToKg('154,3 lb', 'imperial')).toBeCloseTo(154.3 * KG_PER_LB, 2);
   });
 
   it('parses zero', () => {

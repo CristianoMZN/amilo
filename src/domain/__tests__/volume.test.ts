@@ -39,7 +39,8 @@ describe('exerciseVolumeKg', () => {
       { reps: 10, weightKg: 70 },
       { reps: 8, weightKg: 70 },
     ];
-    expect(exerciseVolumeKg(sets)).toBe(1400);
+    // 10*70 + 8*70 = 700 + 560 = 1260 (sets are weighted individually, not aggregated first).
+    expect(exerciseVolumeKg(sets)).toBe(1260);
   });
 
   it('treats null weights as 0', () => {

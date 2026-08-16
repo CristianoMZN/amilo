@@ -152,7 +152,8 @@ describe('progressionSummary', () => {
     const currSets = [makeSet({ weightKg: 70, reps: 5 })];
     const sum = progressionSummary(null, prevSets, currSets);
     expect(sum.weightDeltaKg).toBeNull();
-    expect(sum.repsDelta).toBe(5);
+    // reps actually went down from 10 → 5, so the delta is negative.
+    expect(sum.repsDelta).toBe(-5);
     expect(sum.volumeDeltaKg).toBe(5 * 70);
   });
 });
