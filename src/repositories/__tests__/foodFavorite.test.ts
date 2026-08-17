@@ -8,7 +8,13 @@ import {
   listFavoriteFoods,
   removeFavorite,
 } from 'src/repositories/foodFavorite';
-import { insertFoodRow, insertFoodTranslationRow, type SeedFood, type TestDb, createTestDb } from './testDb';
+import {
+  insertFoodRow,
+  insertFoodTranslationRow,
+  type SeedFood,
+  type TestDb,
+  createTestDb,
+} from './testDb';
 
 const RICE: SeedFood = {
   id: 'food:rice_white',

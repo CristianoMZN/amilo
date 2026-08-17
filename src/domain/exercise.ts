@@ -4,11 +4,7 @@
 // All functions are stateless and side-effect-free. Translation matching
 // is diacritic- and case-insensitive — see `src/util/search.ts`.
 
-import type {
-  Exercise,
-  ExerciseTranslation,
-  SupportedLocale,
-} from './types';
+import type { Exercise, ExerciseTranslation, SupportedLocale } from './types';
 import { matchesSearch } from 'src/util/search';
 
 /**

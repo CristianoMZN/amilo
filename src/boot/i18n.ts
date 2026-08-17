@@ -17,8 +17,7 @@ export default boot(({ app }) => {
   const appStore = useAppStore();
 
   const persisted = appStore.persistedLocale;
-  const deviceLocale =
-    typeof navigator !== 'undefined' ? navigator.language : FALLBACK_LOCALE;
+  const deviceLocale = typeof navigator !== 'undefined' ? navigator.language : FALLBACK_LOCALE;
   const initial: SupportedLocale =
     persisted && isSupportedLocale(persisted) ? persisted : mapLocale(deviceLocale);
 

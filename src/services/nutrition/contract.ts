@@ -31,9 +31,9 @@ import type { MealWithItems } from 'src/repositories/meal';
 
 export interface MealItemInput {
   foodId: string;
-  foodName: string;     // localized at consumption time
-  amount: number;       // canonical amount (g or ml matching food.baseUnit)
-  unit: FoodBaseUnit;   // matches food.baseUnit for the MVP
+  foodName: string; // localized at consumption time
+  amount: number; // canonical amount (g or ml matching food.baseUnit)
+  unit: FoodBaseUnit; // matches food.baseUnit for the MVP
 }
 
 export interface SavedMealItemInput {
@@ -62,8 +62,8 @@ export interface MealTypeChip {
 }
 
 export interface CreateCustomFoodInput {
-  id: string;             // caller-supplied stable id, e.g. 'food:user:<uuid>'
-  name: string;           // name is created in the active locale only
+  id: string; // caller-supplied stable id, e.g. 'food:user:<uuid>'
+  name: string; // name is created in the active locale only
   locale: SupportedLocale;
   baseAmountG: number;
   baseUnit: FoodBaseUnit;
@@ -89,10 +89,7 @@ export interface NutritionService {
     args: { refDate: string; locale: SupportedLocale },
   ): Promise<DailyPanelData>;
 
-  listMealTypeChips(
-    conn: DbConnection,
-    args: { locale: SupportedLocale },
-  ): Promise<MealTypeChip[]>;
+  listMealTypeChips(conn: DbConnection, args: { locale: SupportedLocale }): Promise<MealTypeChip[]>;
 
   // ----- Food library reads -----
 
@@ -116,27 +113,15 @@ export interface NutritionService {
     args: { locale: SupportedLocale },
   ): Promise<Array<Food & { name: string }>>;
 
-  toggleFavorite(
-    conn: DbConnection,
-    args: { foodId: string },
-  ): Promise<boolean>;
+  toggleFavorite(conn: DbConnection, args: { foodId: string }): Promise<boolean>;
 
   // ----- Custom food CRUD -----
 
-  createCustomFood(
-    conn: DbConnection,
-    args: CreateCustomFoodInput,
-  ): Promise<Food>;
+  createCustomFood(conn: DbConnection, args: CreateCustomFoodInput): Promise<Food>;
 
-  updateCustomFood(
-    conn: DbConnection,
-    args: UpdateCustomFoodInput,
-  ): Promise<void>;
+  updateCustomFood(conn: DbConnection, args: UpdateCustomFoodInput): Promise<void>;
 
-  deleteCustomFood(
-    conn: DbConnection,
-    args: { id: string },
-  ): Promise<void>;
+  deleteCustomFood(conn: DbConnection, args: { id: string }): Promise<void>;
 
   // ----- Add / edit / remove meal items -----
 
@@ -155,10 +140,7 @@ export interface NutritionService {
     args: { mealId: number; itemId: number; amount: number },
   ): Promise<MealItem>;
 
-  removeMealItem(
-    conn: DbConnection,
-    args: { itemId: number },
-  ): Promise<void>;
+  removeMealItem(conn: DbConnection, args: { itemId: number }): Promise<void>;
 
   // ----- Saved meals -----
 
@@ -188,15 +170,9 @@ export interface NutritionService {
     },
   ): Promise<{ meal: Meal; items: MealItem[] }>;
 
-  renameSavedMeal(
-    conn: DbConnection,
-    args: { id: number; name: string },
-  ): Promise<void>;
+  renameSavedMeal(conn: DbConnection, args: { id: number; name: string }): Promise<void>;
 
-  deleteSavedMeal(
-    conn: DbConnection,
-    args: { id: number },
-  ): Promise<void>;
+  deleteSavedMeal(conn: DbConnection, args: { id: number }): Promise<void>;
 
   // ----- Repeat / duplicate -----
 
@@ -228,8 +204,5 @@ export interface NutritionService {
    * Initial targets suggestion derived from the user's profile. Note the
    * domain helper that powers this lives in `domain/nutrition/targets.ts`.
    */
-  suggestTargets(
-    conn: DbConnection,
-    args: { profile: UserProfile },
-  ): Promise<NutritionTargets>;
+  suggestTargets(conn: DbConnection, args: { profile: UserProfile }): Promise<NutritionTargets>;
 }

@@ -180,9 +180,7 @@ export class FakeDbConnection implements DbConnection {
     const table = tableMatch[1]!.toLowerCase();
     const colsMatch = /\(([^)]+)\)/.exec(sql);
     if (!colsMatch) return { changes: { changes: 0 }, rows: [] };
-    const cols = (colsMatch[1] ?? '')
-      .split(',')
-      .map((c) => c.trim().toLowerCase());
+    const cols = (colsMatch[1] ?? '').split(',').map((c) => c.trim().toLowerCase());
 
     const isIgnore = /\bINSERT\s+OR\s+IGNORE\b/i.test(upper);
     const isReplace = /\bINSERT\s+OR\s+REPLACE\b/i.test(upper);
@@ -213,8 +211,7 @@ export class FakeDbConnection implements DbConnection {
     // Only check PK conflict when the row actually carries the PK columns
     // (autoincrement tables omit `id` from the INSERT column list).
     const pkOnRow = pk.length > 0 && pk.every((col) => row[col] !== undefined);
-    const sameKey = (a: Row, b: Row): boolean =>
-      pkOnRow && pk.every((col) => a[col] === b[col]);
+    const sameKey = (a: Row, b: Row): boolean => pkOnRow && pk.every((col) => a[col] === b[col]);
     const existingIdx = pkOnRow ? list.findIndex((r) => sameKey(r, row)) : -1;
 
     if (isIgnore && existingIdx >= 0) {
@@ -317,9 +314,7 @@ export class FakeDbConnection implements DbConnection {
           for (const child of cascade) {
             const childList = this.bucket(child, tables);
             const pk = PRIMARY_KEYS[child] ?? [];
-            this.tables[child] = childList.filter((c) =>
-              pk.some((col) => c[col] !== row[col]),
-            );
+            this.tables[child] = childList.filter((c) => pk.some((col) => c[col] !== row[col]));
           }
         }
       } else {
@@ -424,9 +419,7 @@ function evaluateCondition(
   if (inList) {
     const col = (inList[1] ?? '').toLowerCase();
     const tokens = (inList[2] ?? '').split(',').map((t) => t.trim());
-    const candidates = tokens.map((tok) =>
-      tok === '?' ? nextParam() : coerceLiteral(tok),
-    );
+    const candidates = tokens.map((tok) => (tok === '?' ? nextParam() : coerceLiteral(tok)));
     return candidates.some((v) => row[col] === v);
   }
   // LIKE ?

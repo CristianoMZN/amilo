@@ -17,17 +17,17 @@ Repo-specific guidance for OpenCode/agent sessions. Skip generic Vue/TS advice.
 
 ## Commands
 
-| Goal | Command |
-|---|---|
-| Install deps (regenerates `.quasar/`) | `pnpm install` (runs `quasar prepare` via `postinstall`) |
-| Dev server (auto-opens browser) | `pnpm dev` → `quasar dev` |
-| Production build | `pnpm build` → `quasar build` |
-| Lint (matches editor + `vite-plugin-checker`) | `pnpm lint` |
-| Format | `pnpm format` |
-| Type check | `pnpm typecheck` (alias for `vue-tsc --noEmit`) |
-| Unit tests (single run) | `pnpm test` (`vitest run`) |
-| Unit tests (watch) | `pnpm test:watch` |
-| Capacitor sync (Android) | `pnpm cap:sync` (builds then runs `cap sync android`) |
+| Goal                                          | Command                                                  |
+| --------------------------------------------- | -------------------------------------------------------- |
+| Install deps (regenerates `.quasar/`)         | `pnpm install` (runs `quasar prepare` via `postinstall`) |
+| Dev server (auto-opens browser)               | `pnpm dev` → `quasar dev`                                |
+| Production build                              | `pnpm build` → `quasar build`                            |
+| Lint (matches editor + `vite-plugin-checker`) | `pnpm lint`                                              |
+| Format                                        | `pnpm format`                                            |
+| Type check                                    | `pnpm typecheck` (alias for `vue-tsc --noEmit`)          |
+| Unit tests (single run)                       | `pnpm test` (`vitest run`)                               |
+| Unit tests (watch)                            | `pnpm test:watch`                                        |
+| Capacitor sync (Android)                      | `pnpm cap:sync` (builds then runs `cap sync android`)    |
 
 `pnpm dev` runs in the browser. SQLite calls fall back to an in-memory dev stub with a one-time console warning; the dev stub is **only** useful for visual smoke testing of the onboarding flow. Real persistence only happens in the Android build.
 
@@ -80,6 +80,7 @@ vitest.config.ts         # test runner config
 ## Path aliases (already configured in `.quasar/tsconfig.json`)
 
 Use them in imports — don't build relative paths:
+
 - `components/*`, `layouts/*`, `pages/*`, `stores/*`, `boot/*`, `assets/*`
 - `src/*`, `app/*`
 - `#q-app`, `#q-app/wrappers` (Quasar wrappers like `defineRouter`, `defineConfig`)

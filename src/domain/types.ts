@@ -12,11 +12,7 @@ export type BiologicalSex = 'male' | 'female';
 
 /** Activity level used as a TDEE multiplier. */
 export type ActivityLevel =
-  | 'sedentary'
-  | 'lightly_active'
-  | 'moderately_active'
-  | 'very_active'
-  | 'extremely_active';
+  'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
 
 /** User's high-level goal. */
 export type UserGoal = 'lose' | 'maintain' | 'gain';
@@ -99,13 +95,7 @@ export type FoodBaseUnit = 'g' | 'ml';
  * Stable, semantic meal type. The synthetic 'custom' id is used when the
  * user-defined slot carries a `meal.custom_name`.
  */
-export type MealTypeId =
-  | 'breakfast'
-  | 'lunch'
-  | 'snack'
-  | 'dinner'
-  | 'supper'
-  | 'custom';
+export type MealTypeId = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'supper' | 'custom';
 
 /**
  * A reusable nutritional entity. IDs are stable, semantic strings:

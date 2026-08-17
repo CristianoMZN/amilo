@@ -1,16 +1,7 @@
 import type { DbConnection } from '../database/connection';
-import type {
-  MealType,
-  MealTypeId,
-  MealTypeTranslation,
-  SupportedLocale,
-} from 'src/domain/types';
+import type { MealType, MealTypeId, MealTypeTranslation, SupportedLocale } from 'src/domain/types';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -18,11 +9,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -59,22 +46,12 @@ function rowToMealTypeTranslation(row: MealTypeTranslationRow): MealTypeTranslat
 
 /** All meal types, sorted by sortOrder. */
 export async function listMealTypes(conn: DbConnection): Promise<MealType[]> {
-  const rows = await query<MealTypeRow>(
-    conn,
-    'SELECT * FROM meal_type ORDER BY sort_order ASC',
-  );
+  const rows = await query<MealTypeRow>(conn, 'SELECT * FROM meal_type ORDER BY sort_order ASC');
   return rows.map(rowToMealType);
 }
 
-export async function findMealType(
-  conn: DbConnection,
-  id: MealTypeId,
-): Promise<MealType | null> {
-  const rows = await query<MealTypeRow>(
-    conn,
-    'SELECT * FROM meal_type WHERE id = ?',
-    [id],
-  );
+export async function findMealType(conn: DbConnection, id: MealTypeId): Promise<MealType | null> {
+  const rows = await query<MealTypeRow>(conn, 'SELECT * FROM meal_type WHERE id = ?', [id]);
   const row = rows[0];
   return row ? rowToMealType(row) : null;
 }
@@ -108,15 +85,12 @@ export async function listMealTypesWithTranslations(
 }
 
 /** INSERT OR IGNORE — used by the seeder. */
-export async function seedMealTypeIfMissing(
-  conn: DbConnection,
-  mt: MealType,
-): Promise<void> {
-  await exec(
-    conn,
-    'INSERT OR IGNORE INTO meal_type (id, sort_order, builtin) VALUES (?, ?, ?)',
-    [mt.id, mt.sortOrder, mt.builtin ? 1 : 0],
-  );
+export async function seedMealTypeIfMissing(conn: DbConnection, mt: MealType): Promise<void> {
+  await exec(conn, 'INSERT OR IGNORE INTO meal_type (id, sort_order, builtin) VALUES (?, ?, ?)', [
+    mt.id,
+    mt.sortOrder,
+    mt.builtin ? 1 : 0,
+  ]);
 }
 
 /** INSERT OR IGNORE — used by the seeder. */

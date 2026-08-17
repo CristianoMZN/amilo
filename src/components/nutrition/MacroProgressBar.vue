@@ -1,9 +1,14 @@
 <template>
   <div class="macro-progress">
     <div class="macro-progress__row">
-      <span class="macro-progress__label">{{ label }} <span class="macro-progress__short">· {{ short }}</span></span>
+      <span class="macro-progress__label"
+        >{{ label }} <span class="macro-progress__short">· {{ short }}</span></span
+      >
       <span class="macro-progress__value amilio-numeric">
-        {{ formatMacroGrams(current, locale) }}<template v-if="target !== null"> / {{ formatNumber(target, locale, 0) }} {{ t('units.g') }}</template>
+        {{ formatMacroGrams(current, locale)
+        }}<template v-if="target !== null">
+          / {{ formatNumber(target, locale, 0) }} {{ t('units.g') }}</template
+        >
       </span>
     </div>
     <div

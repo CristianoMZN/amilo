@@ -88,11 +88,7 @@ export function ftInToCm(feet: number, inches: number): number {
 }
 
 /** Format a weight value for display in the user's preferred system. */
-export function formatWeight(
-  kg: number,
-  system: MeasurementSystem,
-  fractionDigits = 1,
-): string {
+export function formatWeight(kg: number, system: MeasurementSystem, fractionDigits = 1): string {
   if (system === 'metric') {
     return `${kg.toFixed(fractionDigits)} kg`;
   }

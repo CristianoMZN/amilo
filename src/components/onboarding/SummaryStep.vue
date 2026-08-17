@@ -32,12 +32,7 @@
       </div>
     </div>
 
-    <q-banner
-      v-if="persistError"
-      class="step-summary__error"
-      role="alert"
-      rounded
-    >
+    <q-banner v-if="persistError" class="step-summary__error" role="alert" rounded>
       <template #avatar>
         <q-icon name="error" color="negative" />
       </template>
@@ -214,8 +209,7 @@ async function finish(): Promise<void> {
     onboarding.reset();
     void router.replace('/');
   } catch (err) {
-    persistError.value =
-      err instanceof Error ? err.message : t('common.error');
+    persistError.value = err instanceof Error ? err.message : t('common.error');
     persisting.value = false;
   }
 }

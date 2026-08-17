@@ -37,19 +37,23 @@
           <q-spinner color="primary" size="28px" />
         </div>
         <q-list v-else-if="customFoods.length" separator>
-          <q-item
-            v-for="food in customFoods"
-            :key="food.id"
-            class="nutrition-manage-page__row"
-          >
+          <q-item v-for="food in customFoods" :key="food.id" class="nutrition-manage-page__row">
             <q-item-section>
               <q-item-label class="nutrition-manage-page__row-name">{{ food.name }}</q-item-label>
               <q-item-label caption class="amilio-numeric">
-                {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }} {{ unitLabel(food.baseUnit) }}
+                {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }}
+                {{ unitLabel(food.baseUnit) }}
               </q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-btn flat dense round icon="edit" :aria-label="t('common.save')" @click="openEditCustomFood(food.id)" />
+              <q-btn
+                flat
+                dense
+                round
+                icon="edit"
+                :aria-label="t('common.save')"
+                @click="openEditCustomFood(food.id)"
+              />
             </q-item-section>
             <q-item-section side>
               <q-btn
@@ -81,15 +85,12 @@
           <q-spinner color="primary" size="28px" />
         </div>
         <q-list v-else-if="favoriteFoods.length" separator>
-          <q-item
-            v-for="food in favoriteFoods"
-            :key="food.id"
-            class="nutrition-manage-page__row"
-          >
+          <q-item v-for="food in favoriteFoods" :key="food.id" class="nutrition-manage-page__row">
             <q-item-section>
               <q-item-label class="nutrition-manage-page__row-name">{{ food.name }}</q-item-label>
               <q-item-label caption class="amilio-numeric">
-                {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }} {{ unitLabel(food.baseUnit) }}
+                {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }}
+                {{ unitLabel(food.baseUnit) }}
               </q-item-label>
             </q-item-section>
             <q-item-section side>

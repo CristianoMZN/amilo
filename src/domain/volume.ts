@@ -20,7 +20,9 @@ export function setVolumeKg(reps: number, weightKg: number | null): number {
  * Total volume (kg) across all sets in a list. Sums `reps * weightKg` per
  * set; bodyweight sets contribute 0.
  */
-export function exerciseVolumeKg(sets: ReadonlyArray<{ reps: number; weightKg: number | null }>): number {
+export function exerciseVolumeKg(
+  sets: ReadonlyArray<{ reps: number; weightKg: number | null }>,
+): number {
   let total = 0;
   for (const set of sets) {
     total += setVolumeKg(set.reps, set.weightKg);
@@ -32,7 +34,9 @@ export function exerciseVolumeKg(sets: ReadonlyArray<{ reps: number; weightKg: n
  * Pick the set with the highest non-null `weightKg`. Returns `null` when
  * no set has a weight (all bodyweight / incomplete).
  */
-export function bestSetByWeight(sets: ReadonlyArray<PerformedWorkoutSet>): PerformedWorkoutSet | null {
+export function bestSetByWeight(
+  sets: ReadonlyArray<PerformedWorkoutSet>,
+): PerformedWorkoutSet | null {
   let best: PerformedWorkoutSet | undefined;
   for (const set of sets) {
     if (set.weightKg === null) continue;
@@ -47,7 +51,9 @@ export function bestSetByWeight(sets: ReadonlyArray<PerformedWorkoutSet>): Perfo
  * Pick the set with the highest `reps * weightKg` (kg-volume). Returns
  * `null` when no set has a weight.
  */
-export function bestSetByVolume(sets: ReadonlyArray<PerformedWorkoutSet>): PerformedWorkoutSet | null {
+export function bestSetByVolume(
+  sets: ReadonlyArray<PerformedWorkoutSet>,
+): PerformedWorkoutSet | null {
   let best: PerformedWorkoutSet | undefined;
   for (const set of sets) {
     if (set.weightKg === null) continue;

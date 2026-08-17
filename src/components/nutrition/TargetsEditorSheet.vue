@@ -70,13 +70,7 @@
 
       <q-card-section class="targets-editor__actions">
         <q-space />
-        <q-btn
-          flat
-          no-caps
-          :label="t('common.cancel')"
-          v-close-popup
-          @click="reset"
-        />
+        <q-btn flat no-caps :label="t('common.cancel')" v-close-popup @click="reset" />
         <q-btn
           unelevated
           color="primary"

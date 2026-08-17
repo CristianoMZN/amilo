@@ -66,11 +66,7 @@ const isTooOld = (val: string): true | string => {
 const isRequired = (val: string): true | string =>
   /^\d{4}-\d{2}-\d{2}$/.test(val) || t('onboarding.errors.birthDateRequired');
 
-const birthDateRules = [
-  isRequired,
-  (val: string) => isFuture(val),
-  (val: string) => isTooOld(val),
-];
+const birthDateRules = [isRequired, (val: string) => isFuture(val), (val: string) => isTooOld(val)];
 
 const isValid = computed(() => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDateValue.value)) return false;

@@ -96,9 +96,7 @@ watch(
 
 const display = computed<string>(() => text.value);
 
-const unitLabel = computed<string>(() =>
-  props.unit === 'ml' ? t('units.ml') : t('units.g'),
-);
+const unitLabel = computed<string>(() => (props.unit === 'ml' ? t('units.ml') : t('units.g')));
 
 function clamp(value: number): number {
   if (!Number.isFinite(value)) return props.min;

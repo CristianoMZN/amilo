@@ -119,7 +119,9 @@ const totalSteps = TOTAL;
     height: 8px;
     border-radius: 999px;
     background: var(--amilio-surface-dark);
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease;
 
     &--active {
       background: var(--amilio-yellow-primary);

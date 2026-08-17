@@ -8,11 +8,7 @@ import type { DbConnection } from '../database/connection';
 import type { NutritionTargets } from 'src/domain/types';
 import { nowIso } from 'src/util/dateDay';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -20,11 +16,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -51,9 +43,7 @@ function rowToTargets(row: NutritionTargetsRow): NutritionTargets {
   };
 }
 
-export async function findNutritionTargets(
-  conn: DbConnection,
-): Promise<NutritionTargets | null> {
+export async function findNutritionTargets(conn: DbConnection): Promise<NutritionTargets | null> {
   const rows = await query<NutritionTargetsRow>(
     conn,
     'SELECT * FROM nutrition_targets WHERE id = 1',

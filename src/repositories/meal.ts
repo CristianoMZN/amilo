@@ -1,19 +1,10 @@
 import type { DbConnection } from '../database/connection';
-import type {
-  Meal,
-  MealItem,
-  MealTypeId,
-  SupportedLocale,
-} from 'src/domain/types';
+import type { Meal, MealItem, MealTypeId, SupportedLocale } from 'src/domain/types';
 import { listItemsByMeal } from './mealItem';
 import { findMealTypeTranslation } from './mealType';
 import { nowIso } from 'src/util/dateDay';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -21,11 +12,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -88,11 +75,7 @@ export async function getMealById(
   id: number,
   locale: SupportedLocale,
 ): Promise<MealWithItems | null> {
-  const rows = await query<MealRow>(
-    conn,
-    'SELECT * FROM meal WHERE id = ?',
-    [id],
-  );
+  const rows = await query<MealRow>(conn, 'SELECT * FROM meal WHERE id = ?', [id]);
   const row = rows[0];
   if (!row) return null;
   const meal = rowToMeal(row);
@@ -148,10 +131,7 @@ export async function ensureMealForType(
   // The dev stub's autoincrement gives a fresh MAX(id); the native engine
   // exposes lastInsertRowid. Either way `ORDER BY id DESC` + take first is
   // safe because no other writer is racing us (single-process app).
-  const inserted = await query<MealRow>(
-    conn,
-    'SELECT * FROM meal ORDER BY id DESC',
-  );
+  const inserted = await query<MealRow>(conn, 'SELECT * FROM meal ORDER BY id DESC');
   const insertedRow = inserted[0];
   if (!insertedRow) throw new Error('ensureMealForType: insert failed');
   return rowToMeal(insertedRow);

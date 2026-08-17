@@ -1,10 +1,6 @@
 <template>
   <q-page class="onboarding-page">
-    <component
-      :is="currentStep.component"
-      @next="handleNext"
-      @back="handleBack"
-    />
+    <component :is="currentStep.component" @next="handleNext" @back="handleBack" />
     <footer v-if="showNavigation" class="onboarding-page__nav">
       <q-btn
         flat
@@ -55,29 +51,17 @@ interface StepDescriptor {
  * identifiers, but using defineAsyncComponent keeps the bundle small and
  * lets us share the component definitions from a single map.
  */
-const WELCOME = defineAsyncComponent(
-  () => import('components/onboarding/WelcomeStep.vue'),
-);
-const LANGUAGE = defineAsyncComponent(
-  () => import('components/onboarding/LanguageStep.vue'),
-);
-const MEASUREMENT = defineAsyncComponent(
-  () => import('components/onboarding/MeasurementStep.vue'),
-);
+const WELCOME = defineAsyncComponent(() => import('components/onboarding/WelcomeStep.vue'));
+const LANGUAGE = defineAsyncComponent(() => import('components/onboarding/LanguageStep.vue'));
+const MEASUREMENT = defineAsyncComponent(() => import('components/onboarding/MeasurementStep.vue'));
 const NAME = defineAsyncComponent(() => import('components/onboarding/NameStep.vue'));
-const BIRTHDATE = defineAsyncComponent(
-  () => import('components/onboarding/BirthDateStep.vue'),
-);
+const BIRTHDATE = defineAsyncComponent(() => import('components/onboarding/BirthDateStep.vue'));
 const SEX = defineAsyncComponent(() => import('components/onboarding/SexStep.vue'));
 const HEIGHT = defineAsyncComponent(() => import('components/onboarding/HeightStep.vue'));
 const WEIGHT = defineAsyncComponent(() => import('components/onboarding/WeightStep.vue'));
-const ACTIVITY = defineAsyncComponent(
-  () => import('components/onboarding/ActivityStep.vue'),
-);
+const ACTIVITY = defineAsyncComponent(() => import('components/onboarding/ActivityStep.vue'));
 const GOAL = defineAsyncComponent(() => import('components/onboarding/GoalStep.vue'));
-const SUMMARY = defineAsyncComponent(
-  () => import('components/onboarding/SummaryStep.vue'),
-);
+const SUMMARY = defineAsyncComponent(() => import('components/onboarding/SummaryStep.vue'));
 
 const STEPS: StepDescriptor[] = [
   { component: WELCOME, isValid: () => true },

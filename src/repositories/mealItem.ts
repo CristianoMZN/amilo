@@ -2,11 +2,7 @@ import type { DbConnection } from '../database/connection';
 import type { FoodBaseUnit, MealItem, SupportedLocale } from 'src/domain/types';
 import { nowIso } from 'src/util/dateDay';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -14,11 +10,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -59,10 +51,7 @@ function rowToItem(row: MealItemRow): MealItem {
   };
 }
 
-export async function listItemsByMeal(
-  conn: DbConnection,
-  mealId: number,
-): Promise<MealItem[]> {
+export async function listItemsByMeal(conn: DbConnection, mealId: number): Promise<MealItem[]> {
   const rows = await query<MealItemRow>(
     conn,
     'SELECT * FROM meal_item WHERE meal_id = ? ORDER BY position ASC',
@@ -98,10 +87,7 @@ export async function insertMealItem(
       created,
     ],
   );
-  const rows = await query<{ id: number }>(
-    conn,
-    'SELECT MAX(id) AS id FROM meal_item',
-  );
+  const rows = await query<{ id: number }>(conn, 'SELECT MAX(id) AS id FROM meal_item');
   const id = rows[0]?.id ?? 0;
   return { ...item, id, createdAt: created };
 }

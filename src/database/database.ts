@@ -29,7 +29,10 @@ async function execute(conn: DbConnection, sql: string, params: unknown[] = []):
 }
 
 async function getCurrentVersion(conn: DbConnection): Promise<number> {
-  const row = await queryOne<{ version: number }>(conn, 'SELECT MAX(version) as version FROM schema_version');
+  const row = await queryOne<{ version: number }>(
+    conn,
+    'SELECT MAX(version) as version FROM schema_version',
+  );
   return row?.version ?? 0;
 }
 
@@ -56,11 +59,10 @@ export async function ensureSchema(conn: DbConnection): Promise<void> {
   for (const migration of MIGRATIONS) {
     if (migration.version <= current) continue;
     await execute(conn, migration.sql);
-    await execute(
-      conn,
-      'INSERT INTO schema_version (version, applied_at) VALUES (?, ?)',
-      [migration.version, new Date().toISOString()],
-    );
+    await execute(conn, 'INSERT INTO schema_version (version, applied_at) VALUES (?, ?)', [
+      migration.version,
+      new Date().toISOString(),
+    ]);
   }
 }
 

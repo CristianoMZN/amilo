@@ -80,10 +80,7 @@ describe('bestSetByWeight', () => {
   });
 
   it('returns null when no set has a weight', () => {
-    const sets = [
-      makeSet({ id: 1, weightKg: null }),
-      makeSet({ id: 2, weightKg: null }),
-    ];
+    const sets = [makeSet({ id: 1, weightKg: null }), makeSet({ id: 2, weightKg: null })];
     expect(bestSetByWeight(sets)).toBeNull();
   });
 

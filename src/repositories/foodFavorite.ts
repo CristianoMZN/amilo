@@ -3,11 +3,7 @@ import type { Food, SupportedLocale } from 'src/domain/types';
 import { findFoodById } from './food';
 import { findAnyTranslation, findFoodTranslation } from './foodTranslation';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -15,11 +11,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -40,10 +32,7 @@ export async function listFavoriteFoodIds(conn: DbConnection): Promise<string[]>
   return rows.map((r) => r.food_id);
 }
 
-export async function isFavorite(
-  conn: DbConnection,
-  foodId: string,
-): Promise<boolean> {
+export async function isFavorite(conn: DbConnection, foodId: string): Promise<boolean> {
   const rows = await query<FavoriteRow>(
     conn,
     'SELECT food_id FROM food_favorite WHERE food_id = ?',
@@ -53,21 +42,14 @@ export async function isFavorite(
 }
 
 /** Idempotent insert. PK conflict is silently ignored. */
-export async function addFavorite(
-  conn: DbConnection,
-  foodId: string,
-): Promise<void> {
-  await exec(
-    conn,
-    'INSERT OR IGNORE INTO food_favorite (food_id, created_at) VALUES (?, ?)',
-    [foodId, new Date().toISOString()],
-  );
+export async function addFavorite(conn: DbConnection, foodId: string): Promise<void> {
+  await exec(conn, 'INSERT OR IGNORE INTO food_favorite (food_id, created_at) VALUES (?, ?)', [
+    foodId,
+    new Date().toISOString(),
+  ]);
 }
 
-export async function removeFavorite(
-  conn: DbConnection,
-  foodId: string,
-): Promise<void> {
+export async function removeFavorite(conn: DbConnection, foodId: string): Promise<void> {
   await exec(conn, 'DELETE FROM food_favorite WHERE food_id = ?', [foodId]);
 }
 
@@ -80,8 +62,8 @@ export async function listFavoriteFoods(
   for (const id of await listFavoriteFoodIds(conn)) {
     const f = await findFoodById(conn, id);
     if (!f) continue;
-    const tr = await findFoodTranslation(conn, id, locale)
-      ?? (await findAnyTranslation(conn, id));
+    const tr =
+      (await findFoodTranslation(conn, id, locale)) ?? (await findAnyTranslation(conn, id));
     if (!tr) continue;
     out.push({ ...f, name: tr.name });
   }

@@ -1,11 +1,7 @@
 import type { DbConnection } from '../database/connection';
 import type { UserPreferences } from 'src/domain/types';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -13,11 +9,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -50,10 +42,7 @@ export async function findPreferences(conn: DbConnection): Promise<UserPreferenc
   return row ? rowToPrefs(row) : null;
 }
 
-export async function upsertPreferences(
-  conn: DbConnection,
-  prefs: UserPreferences,
-): Promise<void> {
+export async function upsertPreferences(conn: DbConnection, prefs: UserPreferences): Promise<void> {
   const now = new Date().toISOString();
   await exec(
     conn,
@@ -66,12 +55,6 @@ export async function upsertPreferences(
        theme = excluded.theme,
        onboarding_completed_at = excluded.onboarding_completed_at,
        updated_at = excluded.updated_at`,
-    [
-      prefs.locale,
-      prefs.measurementSystem,
-      prefs.theme,
-      prefs.onboardingCompletedAt,
-      now,
-    ],
+    [prefs.locale, prefs.measurementSystem, prefs.theme, prefs.onboardingCompletedAt, now],
   );
 }

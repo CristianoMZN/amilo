@@ -1,11 +1,7 @@
 import type { DbConnection } from '../database/connection';
 import type { WeightEntry } from 'src/domain/types';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -13,11 +9,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -49,11 +41,11 @@ export async function insertWeightEntry(
   conn: DbConnection,
   entry: Omit<WeightEntry, 'id'>,
 ): Promise<WeightEntry> {
-  await exec(
-    conn,
-    'INSERT INTO weight_entry (weight_kg, recorded_at, source) VALUES (?, ?, ?)',
-    [entry.weightKg, entry.recordedAt, entry.source],
-  );
+  await exec(conn, 'INSERT INTO weight_entry (weight_kg, recorded_at, source) VALUES (?, ?, ?)', [
+    entry.weightKg,
+    entry.recordedAt,
+    entry.source,
+  ]);
   // SQLite's lastInsertRowid is portable; on the dev stub we approximate by
   // returning the timestamp hash. Repositories should treat the returned id
   // as advisory only.

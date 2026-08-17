@@ -39,11 +39,7 @@ export const DEFAULT_MEAL_TYPE_ORDER: Readonly<Record<MealTypeId, number>> = {
  */
 export function isBuiltinMealType(id: string): id is Exclude<MealTypeId, 'custom'> {
   return (
-    id === 'breakfast' ||
-    id === 'lunch' ||
-    id === 'snack' ||
-    id === 'dinner' ||
-    id === 'supper'
+    id === 'breakfast' || id === 'lunch' || id === 'snack' || id === 'dinner' || id === 'supper'
   );
 }
 

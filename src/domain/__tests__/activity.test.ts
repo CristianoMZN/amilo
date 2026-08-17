@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ACTIVITY_LEVELS,
-  getActivityFactor,
-  isActivityLevel,
-} from 'src/domain/activity';
+import { ACTIVITY_LEVELS, getActivityFactor, isActivityLevel } from 'src/domain/activity';
 
 describe('activity levels', () => {
   it('exposes the standard five clinical categories', () => {

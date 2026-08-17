@@ -1,10 +1,5 @@
 <template>
-  <q-item
-    clickable
-    v-ripple
-    class="saved-meal-row"
-    @click="$emit('apply', savedMeal)"
-  >
+  <q-item clickable v-ripple class="saved-meal-row" @click="$emit('apply', savedMeal)">
     <q-item-section>
       <q-item-label class="saved-meal-row__name">{{ savedMeal.name }}</q-item-label>
       <q-item-label caption class="amilio-numeric saved-meal-row__count">
@@ -12,14 +7,7 @@
       </q-item-label>
     </q-item-section>
     <q-item-section side>
-      <q-btn
-        flat
-        round
-        dense
-        icon="more_vert"
-        :aria-label="t('common.save')"
-        @click.stop
-      >
+      <q-btn flat round dense icon="more_vert" :aria-label="t('common.save')" @click.stop>
         <q-menu>
           <q-list dense>
             <q-item clickable v-close-popup @click.stop="$emit('apply', savedMeal)">

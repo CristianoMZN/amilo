@@ -47,17 +47,12 @@
 
         <div class="add-food__results">
           <q-list v-if="results.length" separator>
-            <q-item
-              v-for="food in results"
-              :key="food.id"
-              clickable
-              v-ripple
-              @click="pick(food)"
-            >
+            <q-item v-for="food in results" :key="food.id" clickable v-ripple @click="pick(food)">
               <q-item-section>
                 <q-item-label>{{ food.name }}</q-item-label>
                 <q-item-label caption class="amilio-numeric">
-                  {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }} {{ unitLabel(food.baseUnit) }}
+                  {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }}
+                  {{ unitLabel(food.baseUnit) }}
                 </q-item-label>
               </q-item-section>
               <q-item-section side>
@@ -87,21 +82,24 @@
         </div>
         <div v-if="preview" class="add-food__preview amilio-numeric">
           <span>{{ formatKcal(preview.kcal, locale) }}</span>
-          <span class="add-food__chip">{{ formatMacroGrams(preview.proteinG, locale) }} {{ t('nutrition.macros.proteinShort') }}</span>
-          <span class="add-food__chip">{{ formatMacroGrams(preview.carbsG, locale) }} {{ t('nutrition.macros.carbsShort') }}</span>
-          <span class="add-food__chip">{{ formatMacroGrams(preview.fatG, locale) }} {{ t('nutrition.macros.fatShort') }}</span>
+          <span class="add-food__chip"
+            >{{ formatMacroGrams(preview.proteinG, locale) }}
+            {{ t('nutrition.macros.proteinShort') }}</span
+          >
+          <span class="add-food__chip"
+            >{{ formatMacroGrams(preview.carbsG, locale) }}
+            {{ t('nutrition.macros.carbsShort') }}</span
+          >
+          <span class="add-food__chip"
+            >{{ formatMacroGrams(preview.fatG, locale) }} {{ t('nutrition.macros.fatShort') }}</span
+          >
           <span v-if="preview.fiberG !== null" class="add-food__chip">
             {{ formatMacroGrams(preview.fiberG, locale) }} {{ t('nutrition.macros.fiberShort') }}
           </span>
         </div>
 
         <div class="add-food__actions">
-          <q-btn
-            flat
-            :label="t('common.cancel')"
-            v-close-popup
-            @click="reset"
-          />
+          <q-btn flat :label="t('common.cancel')" v-close-popup @click="reset" />
           <q-btn
             unelevated
             color="primary"
@@ -122,13 +120,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Notify } from 'quasar';
-import type {
-  Food,
-  FoodBaseUnit,
-  MealItem,
-  MealTypeId,
-  SupportedLocale,
-} from 'src/domain/types';
+import type { Food, FoodBaseUnit, MealItem, MealTypeId, SupportedLocale } from 'src/domain/types';
 import { scaleFromBase } from 'src/domain/nutrition';
 import { formatKcal, formatMacroGrams } from 'src/util/format';
 import { getDatabase } from 'src/database/database';
@@ -254,7 +246,12 @@ async function commit(): Promise<void> {
         itemId: props.editingItem.id,
         amount: amount.value,
       });
-      Notify.create({ message: t('common.save'), color: 'positive', position: 'bottom', timeout: 1500 });
+      Notify.create({
+        message: t('common.save'),
+        color: 'positive',
+        position: 'bottom',
+        timeout: 1500,
+      });
     } else {
       await nutritionService.ensureMealAndAddItem(conn, {
         refDate: nutritionStore.selectedDate,
@@ -267,7 +264,12 @@ async function commit(): Promise<void> {
           unit: selected.value.baseUnit,
         },
       });
-      Notify.create({ message: t('nutrition.addFood.addButton'), color: 'positive', position: 'bottom', timeout: 1500 });
+      Notify.create({
+        message: t('nutrition.addFood.addButton'),
+        color: 'positive',
+        position: 'bottom',
+        timeout: 1500,
+      });
     }
     emit('saved');
     open.value = false;

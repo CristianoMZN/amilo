@@ -153,8 +153,7 @@ const en: MessageSchema = {
     dailyExpenditure: 'Estimated daily expenditure',
     goal: 'Goal',
     activity: 'Activity',
-    placeholderNotice:
-      'Food log, training, hydration and insights will land in upcoming sprints.',
+    placeholderNotice: 'Food log, training, hydration and insights will land in upcoming sprints.',
   },
   theme: {
     light: 'Light',

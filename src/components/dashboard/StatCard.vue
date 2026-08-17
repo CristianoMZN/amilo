@@ -1,11 +1,5 @@
 <template>
-  <q-card
-    flat
-    class="stat-card"
-    :class="[`stat-card--${accent}`]"
-    role="group"
-    :aria-label="label"
-  >
+  <q-card flat class="stat-card" :class="[`stat-card--${accent}`]" role="group" :aria-label="label">
     <q-card-section class="stat-card__section">
       <div class="stat-card__label">{{ label }}</div>
       <div class="stat-card__value">{{ value }}</div>
@@ -39,7 +33,9 @@ withDefaults(
   background: var(--amilio-surface, #ffffff);
   color: var(--amilio-text, var(--amilio-text-dark));
   border: 1px solid var(--amilio-border, #e4e4e7);
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 
   &__section {
     padding: 16px 18px;

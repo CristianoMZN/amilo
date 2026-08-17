@@ -96,15 +96,19 @@ const feetValue = ref<number>(5);
 const inchesValue = ref<number>(7);
 
 /** Sync imperial inputs from current store value when system flips. */
-watch(isMetric, (next) => {
-  if (!next) {
-    // Imperial view: derive a friendly starting point from the store value
-    // only when the user had no prior input.
-    if (onboarding.draft.heightCm !== null && cmValue.value === 170) {
-      cmValue.value = onboarding.draft.heightCm;
+watch(
+  isMetric,
+  (next) => {
+    if (!next) {
+      // Imperial view: derive a friendly starting point from the store value
+      // only when the user had no prior input.
+      if (onboarding.draft.heightCm !== null && cmValue.value === 170) {
+        cmValue.value = onboarding.draft.heightCm;
+      }
     }
-  }
-}, { immediate: true });
+  },
+  { immediate: true },
+);
 
 watch(
   () => onboarding.draft.heightCm,

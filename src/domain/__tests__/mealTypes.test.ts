@@ -30,9 +30,7 @@ describe('DEFAULT_MEAL_TYPE_ORDER', () => {
     expect(DEFAULT_MEAL_TYPE_ORDER.snack).toBe(2);
     expect(DEFAULT_MEAL_TYPE_ORDER.dinner).toBe(3);
     expect(DEFAULT_MEAL_TYPE_ORDER.supper).toBe(4);
-    expect(DEFAULT_MEAL_TYPE_ORDER.custom).toBeGreaterThan(
-      DEFAULT_MEAL_TYPE_ORDER.supper,
-    );
+    expect(DEFAULT_MEAL_TYPE_ORDER.custom).toBeGreaterThan(DEFAULT_MEAL_TYPE_ORDER.supper);
   });
 
   it('has an entry for every MealTypeId value', () => {

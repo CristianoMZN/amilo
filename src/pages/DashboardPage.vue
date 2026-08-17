@@ -13,12 +13,7 @@
     </div>
 
     <template v-else-if="profile">
-      <q-banner
-        v-if="isDevMode"
-        class="dashboard-page__dev"
-        rounded
-        dense
-      >
+      <q-banner v-if="isDevMode" class="dashboard-page__dev" rounded dense>
         <template #avatar>
           <q-icon name="science" color="primary" />
         </template>
@@ -41,16 +36,8 @@
           :value="dailyExpenditureDisplay"
           accent="graphite"
         />
-        <StatCard
-          :label="t('dashboard.goal')"
-          :value="goalDisplay"
-          accent="graphite"
-        />
-        <StatCard
-          :label="t('dashboard.activity')"
-          :value="activityDisplay"
-          accent="graphite"
-        />
+        <StatCard :label="t('dashboard.goal')" :value="goalDisplay" accent="graphite" />
+        <StatCard :label="t('dashboard.activity')" :value="activityDisplay" accent="graphite" />
       </section>
 
       <q-banner class="dashboard-page__notice" rounded>

@@ -24,6 +24,22 @@ const routes: RouteRecordRaw[] = [
         name: 'nutrition-manage',
         component: () => import('pages/NutritionManagePage.vue'),
       },
+      {
+        path: 'exercise',
+        name: 'exercise',
+        component: () => import('pages/ExercisePage.vue'),
+      },
+      {
+        path: 'workout',
+        name: 'workout',
+        component: () => import('pages/WorkoutManagePage.vue'),
+      },
+      {
+        path: 'workout/in-progress/:id',
+        name: 'workout-in-progress',
+        component: () => import('pages/WorkoutInProgressPage.vue'),
+        props: true,
+      },
     ],
   },
   {

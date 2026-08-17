@@ -9,62 +9,81 @@
 //
 // Dark mode uses the graphite base with yellow accent.
 
-$primary:   #eab308; // Yellow Strong — primary action
+$primary: #eab308; // Yellow Strong — primary action
 $secondary: #18181b; // Graphite — secondary surface
-$accent:    #facc15; // Yellow Primary — highlight / data viz
+$accent: #facc15; // Yellow Primary — highlight / data viz
 
-$dark:        #09090b; // Black — true black canvas
-$dark-page:   #18181b; // Graphite — dark background surface
+$dark: #09090b; // Black — true black canvas
+$dark-page: #18181b; // Graphite — dark background surface
 
 $positive: #22c55e;
 $negative: #ef4444;
-$info:    #38bdf8;
+$info: #38bdf8;
 $warning: #f59e0b;
 
 // Amilio semantic tokens (used via CSS vars on body — see app.scss)
 :root {
   --amilio-yellow-primary: #facc15;
-  --amilio-yellow-strong:  #eab308;
-  --amilio-black:          #09090b;
-  --amilio-graphite:       #18181b;
-  --amilio-surface-dark:   #27272a;
-  --amilio-bg-light:       #fafafa;
-  --amilio-white:          #ffffff;
-  --amilio-text-dark:      #09090b;
-  --amilio-text-light:     #fafafa;
+  --amilio-yellow-strong: #eab308;
+  --amilio-black: #09090b;
+  --amilio-graphite: #18181b;
+  --amilio-surface-dark: #27272a;
+  --amilio-bg-light: #fafafa;
+  --amilio-white: #ffffff;
+  --amilio-text-dark: #09090b;
+  --amilio-text-light: #fafafa;
   --amilio-text-secondary: #71717a;
-  --amilio-border:         #e4e4e7;
+  --amilio-border: #e4e4e7;
 
   // Macronutrient data viz — used sparingly as semantic accents inside the
   // nutrition module. The overall interface stays graphite/black/yellow.
-  --amilio-cal-orange:     #f97316;  // calories
-  --amilio-pro-rose:       #f43f5e;  // protein
-  --amilio-carb-amber:     #f59e0b;  // carbohydrates
-  --amilio-fat-lime:       #84cc16;  // fat
+  --amilio-cal-orange: #f97316; // calories
+  --amilio-pro-rose: #f43f5e; // protein
+  --amilio-carb-amber: #f59e0b; // carbohydrates
+  --amilio-fat-lime: #84cc16; // fat
 
   // "Strong" variants (700-tone). The base accents above fail WCAG AA on
   // light surfaces (e.g. amber ≈ 2.15:1 on white). Components should
   // prefer the *-strong variants in light mode and the original accents
   // in dark mode (`.body--dark` overrides below) for the 4–6:1 contrast
   // target.
-  --amilio-cal-orange-strong:   #c2410c;  // kcal contrast over white ≈ 4.7:1
-  --amilio-pro-rose-strong:     #be123c;  // protein contrast over white ≈ 5.6:1
-  --amilio-carb-amber-strong:   #b45309;  // carbs contrast over white ≈ 4.6:1
-  --amilio-fat-lime-strong:     #4d7c0f;  // fat contrast over white ≈ 5.0:1
+  --amilio-cal-orange-strong: #c2410c; // kcal contrast over white ≈ 4.7:1
+  --amilio-pro-rose-strong: #be123c; // protein contrast over white ≈ 5.6:1
+  --amilio-carb-amber-strong: #b45309; // carbs contrast over white ≈ 4.6:1
+  --amilio-fat-lime-strong: #4d7c0f; // fat contrast over white ≈ 5.0:1
 
-  --amilio-progress-track: #3f3f46;  // zinc-700 — progress bar rail (dark UI)
-  --amilio-progress-track-light: #e4e4e7;  // zinc-200 — progress bar rail (light UI)
+  --amilio-progress-track: #3f3f46; // zinc-700 — progress bar rail (dark UI)
+  --amilio-progress-track-light: #e4e4e7; // zinc-200 — progress bar rail (light UI)
+
+  // Sprint 3 — exercise / workout semantic accents.
+  //   violet = strength module (workouts, sets, reps, weights)
+  //   teal   = aerobic module (cardio, durations, history)
+  //   orange = kcal estimate (compact "120 kcal" chips, computed totals)
+  // The *-strong variants match the kcal/pro/carb/fat pattern: lighter
+  // accents for dark mode, 700-tone accents for light-mode contrast.
+  --amilio-violet: #a855f7;
+  --amilio-violet-strong: #7e22ce;
+  --amilio-teal: #14b8a6;
+  --amilio-teal-strong: #0f766e;
+  --amilio-orange: #f97316;
+  --amilio-orange-strong: #c2410c;
 }
 
 .body--dark {
-  --amilio-bg:      var(--amilio-black);
+  --amilio-bg: var(--amilio-black);
   --amilio-surface: var(--amilio-graphite);
-  --amilio-text:    var(--amilio-text-light);
+  --amilio-text: var(--amilio-text-light);
   // Dark mode: prefer the lighter base accents — they already pass AA
   // (>= 4.7:1) over the graphite surface, while the *-strong variants
   // would lose their punch against a near-black background.
-  --amilio-cal-orange-strong:   var(--amilio-cal-orange);
-  --amilio-pro-rose-strong:     var(--amilio-pro-rose);
-  --amilio-carb-amber-strong:   var(--amilio-carb-amber);
-  --amilio-fat-lime-strong:     var(--amilio-fat-lime);
+  --amilio-cal-orange-strong: var(--amilio-cal-orange);
+  --amilio-pro-rose-strong: var(--amilio-pro-rose);
+  --amilio-carb-amber-strong: var(--amilio-carb-amber);
+  --amilio-fat-lime-strong: var(--amilio-fat-lime);
+
+  // Sprint 3 — dark mode keeps the base accents for sufficient contrast on
+  // the graphite canvas (mirrors the kcal/pro/carb/fat pattern above).
+  --amilio-violet-strong: var(--amilio-violet);
+  --amilio-teal-strong: var(--amilio-teal);
+  --amilio-orange-strong: var(--amilio-orange);
 }

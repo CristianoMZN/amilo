@@ -21,7 +21,14 @@ function makeFood(overrides: Partial<Food> = {}): Food {
 
 describe('scaleFromBase', () => {
   it('is identity when amount equals baseAmountG', () => {
-    const food = makeFood({ baseAmountG: 100, kcal: 250, proteinG: 12, carbsG: 40, fatG: 8, fiberG: 5 });
+    const food = makeFood({
+      baseAmountG: 100,
+      kcal: 250,
+      proteinG: 12,
+      carbsG: 40,
+      fatG: 8,
+      fiberG: 5,
+    });
     const snap = scaleFromBase(food, 100);
     expect(snap.kcal).toBe(250);
     expect(snap.proteinG).toBe(12);
@@ -31,7 +38,14 @@ describe('scaleFromBase', () => {
   });
 
   it('scales 1.5x for 150g against a 100g base', () => {
-    const food = makeFood({ baseAmountG: 100, kcal: 200, proteinG: 10, carbsG: 30, fatG: 5, fiberG: 3 });
+    const food = makeFood({
+      baseAmountG: 100,
+      kcal: 200,
+      proteinG: 10,
+      carbsG: 30,
+      fatG: 5,
+      fiberG: 3,
+    });
     const snap = scaleFromBase(food, 150);
     expect(snap.kcal).toBe(300);
     expect(snap.proteinG).toBe(15);
@@ -41,7 +55,14 @@ describe('scaleFromBase', () => {
   });
 
   it('scales 0.5x for 50g against a 100g base', () => {
-    const food = makeFood({ baseAmountG: 100, kcal: 200, proteinG: 10, carbsG: 30, fatG: 5, fiberG: 3 });
+    const food = makeFood({
+      baseAmountG: 100,
+      kcal: 200,
+      proteinG: 10,
+      carbsG: 30,
+      fatG: 5,
+      fiberG: 3,
+    });
     const snap = scaleFromBase(food, 50);
     expect(snap.kcal).toBe(100);
     expect(snap.proteinG).toBe(5);
@@ -128,7 +149,14 @@ describe('createSnapshot', () => {
   });
 
   it('returns the same numeric values as scaleFromBase', () => {
-    const food = makeFood({ baseAmountG: 100, kcal: 200, proteinG: 10, carbsG: 30, fatG: 5, fiberG: 3 });
+    const food = makeFood({
+      baseAmountG: 100,
+      kcal: 200,
+      proteinG: 10,
+      carbsG: 30,
+      fatG: 5,
+      fiberG: 3,
+    });
     const snap = createSnapshot(food, 'Test', 150);
     const scaled = scaleFromBase(food, 150);
     expect(snap.kcal).toBe(scaled.kcal);
@@ -139,7 +167,14 @@ describe('createSnapshot', () => {
   });
 
   it('round-trips a food unchanged at baseAmountG', () => {
-    const food = makeFood({ baseAmountG: 100, kcal: 350, proteinG: 20, carbsG: 50, fatG: 8, fiberG: 4 });
+    const food = makeFood({
+      baseAmountG: 100,
+      kcal: 350,
+      proteinG: 20,
+      carbsG: 50,
+      fatG: 8,
+      fiberG: 4,
+    });
     const snap = createSnapshot(food, 'X', 100);
     expect(snap.kcal).toBe(food.kcal);
     expect(snap.proteinG).toBe(food.proteinG);

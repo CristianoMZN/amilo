@@ -86,8 +86,5 @@ export function suggestMeasurementSystem(input: string | null | undefined): Meas
 }
 
 export function isSupportedLocale(value: unknown): value is SupportedLocale {
-  return (
-    typeof value === 'string' &&
-    SUPPORTED_LOCALES.includes(value as SupportedLocale)
-  );
+  return typeof value === 'string' && SUPPORTED_LOCALES.includes(value as SupportedLocale);
 }

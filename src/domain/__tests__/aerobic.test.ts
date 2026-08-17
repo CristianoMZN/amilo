@@ -80,17 +80,13 @@ describe('buildAerobicSnapshot', () => {
 describe('formatKcalCompact', () => {
   it('uses comma thousands separator in en', () => {
     // Sanity check the ICU output the test is asserting against.
-    expect(new Intl.NumberFormat('en', { maximumFractionDigits: 0 }).format(1234)).toBe(
-      '1,234',
-    );
+    expect(new Intl.NumberFormat('en', { maximumFractionDigits: 0 }).format(1234)).toBe('1,234');
     expect(formatKcalCompact(1234, 'en')).toBe('1,234');
   });
 
   it('uses dot thousands separator in pt-BR', () => {
     // ICU: pt-BR uses `.` for thousands and `,` for decimal.
-    expect(new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(1234)).toBe(
-      '1.234',
-    );
+    expect(new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(1234)).toBe('1.234');
     expect(formatKcalCompact(1234, 'pt-BR')).toBe('1.234');
   });
 

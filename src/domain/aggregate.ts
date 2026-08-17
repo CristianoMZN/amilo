@@ -19,9 +19,7 @@ type ItemSnapshot = Pick<
  * `fiberG` is summed only over non-null entries. If the input is empty or
  * no item contributes fiber, the result's `fiberG` is `null`.
  */
-export function aggregateItems(
-  items: ReadonlyArray<ItemSnapshot>,
-): NutritionSnapshot {
+export function aggregateItems(items: ReadonlyArray<ItemSnapshot>): NutritionSnapshot {
   let kcal = 0;
   let proteinG = 0;
   let carbsG = 0;

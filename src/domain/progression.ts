@@ -13,10 +13,7 @@ import { bestSetByVolume, exerciseVolumeKg, setVolumeKg } from './volume';
  * previous? Returns `curr.reps` when there is no previous row to compare
  * against (treats the missing baseline as `0`).
  */
-export function compareReps(
-  prev: { reps: number } | null,
-  curr: { reps: number },
-): number {
+export function compareReps(prev: { reps: number } | null, curr: { reps: number }): number {
   const prevReps = prev?.reps ?? 0;
   return curr.reps - prevReps;
 }

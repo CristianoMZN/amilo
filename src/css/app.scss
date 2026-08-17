@@ -19,8 +19,16 @@
 // Ensure default text colour respects the theme.
 body {
   color: var(--amilio-text-dark);
-  font-family: 'Roboto', 'Noto Sans', 'Noto Sans JP', 'Noto Sans KR', system-ui,
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:
+    'Roboto',
+    'Noto Sans',
+    'Noto Sans JP',
+    'Noto Sans KR',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 
 .body--dark {

@@ -120,7 +120,9 @@ function submit(): void {
     text-align: left;
     color: inherit;
     cursor: pointer;
-    transition: border-color 0.18s ease, transform 0.18s ease;
+    transition:
+      border-color 0.18s ease,
+      transform 0.18s ease;
 
     &:active {
       transform: scale(0.99);

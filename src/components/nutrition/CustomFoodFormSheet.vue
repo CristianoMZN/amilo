@@ -107,7 +107,8 @@
         <div class="custom-food__preview amilio-numeric">
           <span class="custom-food__chip">{{ Math.round(previewKcal) }} kcal</span>
           <span class="custom-food__chip">
-            {{ t('nutrition.macros.proteinShort') }} {{ Math.round(previewProtein) }} {{ t('units.g') }}
+            {{ t('nutrition.macros.proteinShort') }} {{ Math.round(previewProtein) }}
+            {{ t('units.g') }}
           </span>
           <span class="custom-food__chip">
             {{ t('nutrition.macros.carbsShort') }} {{ Math.round(previewCarbs) }} {{ t('units.g') }}
@@ -132,13 +133,7 @@
           @click="confirmDelete"
         />
         <q-space />
-        <q-btn
-          flat
-          no-caps
-          :label="t('common.cancel')"
-          v-close-popup
-          @click="reset"
-        />
+        <q-btn flat no-caps :label="t('common.cancel')" v-close-popup @click="reset" />
         <q-btn
           unelevated
           color="primary"

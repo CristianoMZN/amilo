@@ -9,12 +9,7 @@
 // The synthetic `'custom'` id is intentionally NOT seeded: it is rendered via
 // `Meal.customName` instead of having its own translation row.
 
-import type {
-  MealType,
-  MealTypeId,
-  MealTypeTranslation,
-  SupportedLocale,
-} from 'src/domain/types';
+import type { MealType, MealTypeId, MealTypeTranslation, SupportedLocale } from 'src/domain/types';
 
 /** All locales shipped in the app, in canonical order. */
 const SUPPORTED_LOCALES: readonly SupportedLocale[] = [

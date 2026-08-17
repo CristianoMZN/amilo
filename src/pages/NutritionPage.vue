@@ -2,14 +2,7 @@
   <q-page class="nutrition-page">
     <!-- Date navigation -->
     <header class="nutrition-page__datebar">
-      <q-btn
-        flat
-        dense
-        round
-        icon="chevron_left"
-        aria-label="Dia anterior"
-        @click="shiftDay(-1)"
-      />
+      <q-btn flat dense round icon="chevron_left" aria-label="Dia anterior" @click="shiftDay(-1)" />
       <div class="nutrition-page__date-label">{{ dateLabel }}</div>
       <q-btn
         flat
@@ -59,7 +52,7 @@
       </div>
 
       <MealCard
-        v-for="meal in (panel?.meals ?? [])"
+        v-for="meal in panel?.meals ?? []"
         :key="meal.meal.id"
         :meal="meal.meal"
         :items="meal.items"

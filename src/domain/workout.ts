@@ -47,7 +47,9 @@ export function reorderByPosition<T extends { position: number }>(items: Readonl
  * The input array is never mutated; a fresh shallow copy is produced for
  * each item so callers can persist the result safely.
  */
-export function assignConsecutivePositions<T extends { position: number }>(items: ReadonlyArray<T>): T[] {
+export function assignConsecutivePositions<T extends { position: number }>(
+  items: ReadonlyArray<T>,
+): T[] {
   return items.map((item, i) => ({ ...item, position: i }));
 }
 

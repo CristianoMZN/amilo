@@ -1,16 +1,9 @@
 import type { DbConnection } from '../database/connection';
 import type { SavedMeal, SavedMealItem, SupportedLocale } from 'src/domain/types';
-import {
-  insertSavedMealItem,
-  listSavedMealItems,
-} from './savedMealItem';
+import { insertSavedMealItem, listSavedMealItems } from './savedMealItem';
 import { nowIso } from 'src/util/dateDay';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -18,11 +11,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -57,10 +46,7 @@ export async function listSavedMeals(
   locale: SupportedLocale,
 ): Promise<SavedMealWithCount[]> {
   void locale;
-  const rows = await query<SavedMealRow>(
-    conn,
-    'SELECT * FROM saved_meal ORDER BY updated_at DESC',
-  );
+  const rows = await query<SavedMealRow>(conn, 'SELECT * FROM saved_meal ORDER BY updated_at DESC');
   const out: SavedMealWithCount[] = [];
   for (const r of rows) {
     const sm = rowToSavedMeal(r);
@@ -76,11 +62,7 @@ export async function getSavedMealWithItems(
   locale: SupportedLocale,
 ): Promise<{ savedMeal: SavedMeal; items: SavedMealItem[] } | null> {
   void locale;
-  const rows = await query<SavedMealRow>(
-    conn,
-    'SELECT * FROM saved_meal WHERE id = ?',
-    [id],
-  );
+  const rows = await query<SavedMealRow>(conn, 'SELECT * FROM saved_meal WHERE id = ?', [id]);
   const row = rows[0];
   if (!row) return null;
   const savedMeal = rowToSavedMeal(row);
@@ -91,9 +73,7 @@ export async function getSavedMealWithItems(
 export interface CreateSavedMealInput {
   name: string;
   locale: SupportedLocale;
-  items: ReadonlyArray<
-    Omit<SavedMealItem, 'id' | 'savedMealId' | 'createdAt'>
-  >;
+  items: ReadonlyArray<Omit<SavedMealItem, 'id' | 'savedMealId' | 'createdAt'>>;
 }
 
 export async function createSavedMeal(
@@ -107,10 +87,7 @@ export async function createSavedMeal(
      VALUES (?, ?, ?, ?)`,
     [args.name, args.locale, now, now],
   );
-  const rows = await query<SavedMealRow>(
-    conn,
-    'SELECT * FROM saved_meal ORDER BY id DESC',
-  );
+  const rows = await query<SavedMealRow>(conn, 'SELECT * FROM saved_meal ORDER BY id DESC');
   const head = rows[0];
   if (!head) throw new Error('createSavedMeal: insert failed');
   const savedMeal = rowToSavedMeal(head);
@@ -122,21 +99,14 @@ export async function createSavedMeal(
   return savedMeal;
 }
 
-export async function renameSavedMeal(
-  conn: DbConnection,
-  id: number,
-  name: string,
-): Promise<void> {
-  await exec(
-    conn,
-    'UPDATE saved_meal SET name = ?, updated_at = ? WHERE id = ?',
-    [name, nowIso(), id],
-  );
+export async function renameSavedMeal(conn: DbConnection, id: number, name: string): Promise<void> {
+  await exec(conn, 'UPDATE saved_meal SET name = ?, updated_at = ? WHERE id = ?', [
+    name,
+    nowIso(),
+    id,
+  ]);
 }
 
-export async function deleteSavedMeal(
-  conn: DbConnection,
-  id: number,
-): Promise<void> {
+export async function deleteSavedMeal(conn: DbConnection, id: number): Promise<void> {
   await exec(conn, 'DELETE FROM saved_meal WHERE id = ?', [id]);
 }

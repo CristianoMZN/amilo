@@ -33,8 +33,5 @@ export function getActivityFactor(level: ActivityLevel): number {
 }
 
 export function isActivityLevel(value: unknown): value is ActivityLevel {
-  return (
-    typeof value === 'string' &&
-    Object.prototype.hasOwnProperty.call(ACTIVITY_BY_ID, value)
-  );
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(ACTIVITY_BY_ID, value);
 }

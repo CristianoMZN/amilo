@@ -1,9 +1,6 @@
 // Targets suggestion. Non-prescriptive — see the JSDoc below.
 
-import type {
-  NutritionTargets,
-  UserProfile,
-} from 'src/domain/types';
+import type { NutritionTargets, UserProfile } from 'src/domain/types';
 import { estimateTdee } from 'src/domain/age';
 import { mifflinStJeor, roundKcal } from 'src/domain/metabolism';
 import { nowIso } from 'src/util/dateDay';
@@ -60,7 +57,8 @@ export function suggestTargetsFromProfile(profile: UserProfile): NutritionTarget
 
   const proteinGTarget = roundToTenth(Math.max(0, SUGGESTED_PROTEIN_G_PER_KG * profile.weightKg));
   const fatGTarget = roundToTenth(Math.max(0, (kcalTarget * FAT_KCAL_RATIO) / KCAL_PER_G_FAT));
-  const carbsKcalRemaining = kcalTarget - proteinGTarget * KCAL_PER_G_PROTEIN - fatGTarget * KCAL_PER_G_FAT;
+  const carbsKcalRemaining =
+    kcalTarget - proteinGTarget * KCAL_PER_G_PROTEIN - fatGTarget * KCAL_PER_G_FAT;
   const carbsGTarget = roundToTenth(Math.max(0, carbsKcalRemaining / KCAL_PER_G_CARB));
 
   return {

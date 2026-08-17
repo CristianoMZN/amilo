@@ -36,6 +36,8 @@
       >
         <q-route-tab exact to="/" :label="t('nav.home')" icon="home" />
         <q-route-tab to="/nutrition" :label="t('nav.nutrition')" icon="restaurant" />
+        <q-route-tab to="/exercise" :label="t('nav.exercise')" icon="fitness_center" />
+        <q-route-tab to="/workout" :label="t('nav.workout')" icon="event_note" />
       </q-tabs>
     </q-footer>
   </q-layout>

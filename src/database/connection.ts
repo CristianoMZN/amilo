@@ -14,10 +14,7 @@
  */
 
 import { Capacitor } from '@capacitor/core';
-import {
-  CapacitorSQLite,
-  SQLiteConnection,
-} from '@capacitor-community/sqlite';
+import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 
 export interface DbConnection {
   /** Resolves when the connection is open and migrations are applied. */
@@ -80,14 +77,7 @@ const STUB_COLUMNS: Readonly<Record<string, readonly string[]>> = {
   meal_type: ['id', 'sort_order', 'builtin'],
   meal_type_translation: ['meal_type_id', 'locale', 'name'],
 
-  meal: [
-    'id',
-    'ref_date',
-    'meal_type_id',
-    'custom_name',
-    'position',
-    'created_at',
-  ],
+  meal: ['id', 'ref_date', 'meal_type_id', 'custom_name', 'position', 'created_at'],
   meal_item: [
     'id',
     'meal_id',
@@ -159,14 +149,7 @@ const STUB_COLUMNS: Readonly<Record<string, readonly string[]>> = {
   aerobic_favorite: ['exercise_id', 'created_at'],
 
   workout_sheet: ['id', 'name', 'position', 'created_at', 'updated_at'],
-  workout_session: [
-    'id',
-    'sheet_id',
-    'name',
-    'position',
-    'created_at',
-    'updated_at',
-  ],
+  workout_session: ['id', 'sheet_id', 'name', 'position', 'created_at', 'updated_at'],
   workout_planned_exercise: [
     'id',
     'session_id',
@@ -449,11 +432,7 @@ class DevStubConnection implements DbConnection {
   // Read path
   // -------------------------------------------------------------------------
 
-  private query(
-    statement: string,
-    values: unknown[],
-    tables: Map<string, RowValues[]>,
-  ) {
+  private query(statement: string, values: unknown[], tables: Map<string, RowValues[]>) {
     const trimmed = statement.trim();
     const upper = trimmed.toUpperCase();
 
@@ -472,7 +451,8 @@ class DevStubConnection implements DbConnection {
       const list = tables.get(table) ?? [];
       const filtered = list.filter((r) => matchesWhere(r, trimmed, values));
       const value = aggregateValue(fn, col, filtered);
-      const key = alias ?? (fn === 'COUNT' && col === '*' ? 'count' : `${fn.toLowerCase()}(${col})`);
+      const key =
+        alias ?? (fn === 'COUNT' && col === '*' ? 'count' : `${fn.toLowerCase()}(${col})`);
       return [{ [key]: value }];
     }
 
@@ -505,10 +485,7 @@ class DevStubConnection implements DbConnection {
 // Helpers — extracted outside the class so they're easy to unit-test.
 // ---------------------------------------------------------------------------
 
-function matchTableName(
-  stmt: string,
-  after: 'INTO' | 'UPDATE' | 'FROM',
-): string | null {
+function matchTableName(stmt: string, after: 'INTO' | 'UPDATE' | 'FROM'): string | null {
   if (after === 'FROM') {
     const m = stmt.match(/\bFROM\s+(\w+)/i);
     return m && m[1] ? m[1].toLowerCase() : null;
@@ -590,11 +567,7 @@ function matchWhereId(stmt: string, totalParams: number): number | null {
  * condition means no row ever matches, which surfaces dev/prod divergence
  * early instead of silently passing every row.
  */
-function matchesWhere(
-  row: RowValues,
-  stmt: string,
-  values: unknown[],
-): boolean {
+function matchesWhere(row: RowValues, stmt: string, values: unknown[]): boolean {
   const whereMatch = stmt.match(/\bWHERE\b([\s\S]*?)(?:\bORDER\s+BY\b|\bLIMIT\b|;|$)/i);
   if (!whereMatch) return true;
   const clause = whereMatch[1] ?? '';
@@ -656,9 +629,7 @@ function evaluateCondition(
   if (like) {
     const [, col, raw] = like;
     if (!col || !raw) return 'unknown';
-    const pattern = raw === '?'
-      ? String(nextParam())
-      : raw.slice(1, -1);
+    const pattern = raw === '?' ? String(nextParam()) : raw.slice(1, -1);
     const re = new RegExp('^' + pattern.replace(/%/g, '.*').replace(/_/g, '.') + '$');
     return re.test(String(row[col] ?? ''));
   }
@@ -711,7 +682,9 @@ interface AggregatePattern {
 
 function detectAggregate(trimmed: string, upper: string): AggregatePattern | null {
   if (!upper.startsWith('SELECT') || !/\bFROM\s+/i.test(trimmed)) return null;
-  const fnMatch = upper.match(/\bSELECT\s+(COUNT|SUM|MAX|MIN|AVG)\s*\(\s*(\*|\w+)\s*\)(?:\s+AS\s+(\w+))?/i);
+  const fnMatch = upper.match(
+    /\bSELECT\s+(COUNT|SUM|MAX|MIN|AVG)\s*\(\s*(\*|\w+)\s*\)(?:\s+AS\s+(\w+))?/i,
+  );
   if (!fnMatch) return null;
   const fnRaw = fnMatch[1] ?? '';
   const colRaw = fnMatch[2] ?? '';
@@ -725,11 +698,7 @@ function detectAggregate(trimmed: string, upper: string): AggregatePattern | nul
   return { fn, col, alias: aliasRaw, table };
 }
 
-function aggregateValue(
-  fn: AggregatePattern['fn'],
-  col: string,
-  rows: RowValues[],
-): number {
+function aggregateValue(fn: AggregatePattern['fn'], col: string, rows: RowValues[]): number {
   if (fn === 'COUNT' && col === '*') return rows.length;
   const values = rows.map((r) => Number(r[col])).filter((n) => !Number.isNaN(n));
   if (values.length === 0) return 0;
@@ -765,7 +734,10 @@ function detectUnsupportedFeatures(upper: string): string | null {
 }
 
 function splitAnd(clause: string): string[] {
-  return clause.split(/\bAND\b/i).map((s) => s.trim()).filter(Boolean);
+  return clause
+    .split(/\bAND\b/i)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function orderRows(rows: RowValues[], stmt: string): RowValues[] {

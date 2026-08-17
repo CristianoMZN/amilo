@@ -51,7 +51,7 @@ function mealTypeDisplayName(
   customName: string | null,
   typeName: string,
 ): string {
-  return mealTypeId === 'custom' ? customName ?? typeName : typeName || (customName ?? '');
+  return mealTypeId === 'custom' ? (customName ?? typeName) : typeName || (customName ?? '');
 }
 void mealTypeDisplayName;
 
@@ -287,7 +287,11 @@ export const nutritionService: NutritionService = {
     if (!food) {
       throw new Error(`updateMealItemAmount: food ${target.foodId} no longer exists`);
     }
-    const liveName = await resolveFoodName(conn, target.foodId, food.id.startsWith('food:user:') ? 'en' : 'en');
+    const liveName = await resolveFoodName(
+      conn,
+      target.foodId,
+      food.id.startsWith('food:user:') ? 'en' : 'en',
+    );
     // For official foods with no live translation we keep the snapshot's name;
     // the live lookup is best-effort.
     const nameForSnapshot = liveName || target.foodNameSnapshot;

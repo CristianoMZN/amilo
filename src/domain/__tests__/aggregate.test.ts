@@ -101,11 +101,7 @@ describe('aggregateMeals', () => {
   });
 
   it('handles meals with no items', () => {
-    const meals = [
-      { items: [] },
-      { items: [item({ kcal: 100, fiberG: 2 })] },
-      { items: [] },
-    ];
+    const meals = [{ items: [] }, { items: [item({ kcal: 100, fiberG: 2 })] }, { items: [] }];
     const result = aggregateMeals(meals);
     expect(result.kcal).toBe(100);
     expect(result.fiberG).toBe(2);

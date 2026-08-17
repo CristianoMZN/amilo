@@ -18,10 +18,7 @@ export interface TestDb {
   /** Execute a statement verbatim. */
   exec: (sql: string, params?: unknown[]) => Promise<void>;
   /** Read rows verbatim. */
-  query: <T = Record<string, unknown>>(
-    sql: string,
-    params?: unknown[],
-  ) => Promise<T[]>;
+  query: <T = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<T[]>;
   close: () => Promise<void>;
 }
 
@@ -105,10 +102,10 @@ export async function insertFavoriteRow(
   foodId: string,
   createdAt: string,
 ): Promise<void> {
-  await db.exec(
-    `INSERT OR IGNORE INTO food_favorite (food_id, created_at) VALUES (?, ?)`,
-    [foodId, createdAt],
-  );
+  await db.exec(`INSERT OR IGNORE INTO food_favorite (food_id, created_at) VALUES (?, ?)`, [
+    foodId,
+    createdAt,
+  ]);
 }
 
 export async function insertMealTypeRow(
@@ -117,10 +114,11 @@ export async function insertMealTypeRow(
   sortOrder: number,
   builtin: boolean,
 ): Promise<void> {
-  await db.exec(
-    `INSERT OR IGNORE INTO meal_type (id, sort_order, builtin) VALUES (?, ?, ?)`,
-    [id, sortOrder, builtin ? 1 : 0],
-  );
+  await db.exec(`INSERT OR IGNORE INTO meal_type (id, sort_order, builtin) VALUES (?, ?, ?)`, [
+    id,
+    sortOrder,
+    builtin ? 1 : 0,
+  ]);
 }
 
 export async function insertMealTypeTranslationRow(

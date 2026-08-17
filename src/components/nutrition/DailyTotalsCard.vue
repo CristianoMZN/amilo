@@ -31,14 +31,16 @@
       </div>
       <div class="daily-totals__goal">
         <template v-if="targets">
-          {{ t('nutrition.totals.goalLabel') }} {{ formatKcal(targets.kcalTarget, $i18n.locale as SupportedLocale) }}
+          {{ t('nutrition.totals.goalLabel') }}
+          {{ formatKcal(targets.kcalTarget, $i18n.locale as SupportedLocale) }}
         </template>
         <template v-else>
           {{ t('nutrition.totals.noGoal') }}
         </template>
       </div>
       <div v-if="targets" class="daily-totals__remaining" :class="`amilio-numeric`">
-        {{ remainingKcal >= 0 ? '↓' : '↑' }} {{ formatKcal(Math.abs(remainingKcal), $i18n.locale as SupportedLocale) }}
+        {{ remainingKcal >= 0 ? '↓' : '↑' }}
+        {{ formatKcal(Math.abs(remainingKcal), $i18n.locale as SupportedLocale) }}
         {{ remainingKcal >= 0 ? t('nutrition.totals.remaining') : t('nutrition.copy.ofGoal') }}
       </div>
 
@@ -48,7 +50,7 @@
           :short="t('nutrition.macros.proteinShort')"
           :current="totals.proteinG"
           :target="targets?.proteinGTarget ?? null"
-          :locale="($i18n.locale as SupportedLocale)"
+          :locale="$i18n.locale as SupportedLocale"
           color="protein"
         />
         <MacroProgressBar
@@ -56,7 +58,7 @@
           :short="t('nutrition.macros.carbsShort')"
           :current="totals.carbsG"
           :target="targets?.carbsGTarget ?? null"
-          :locale="($i18n.locale as SupportedLocale)"
+          :locale="$i18n.locale as SupportedLocale"
           color="carbs"
         />
         <MacroProgressBar
@@ -64,7 +66,7 @@
           :short="t('nutrition.macros.fatShort')"
           :current="totals.fatG"
           :target="targets?.fatGTarget ?? null"
-          :locale="($i18n.locale as SupportedLocale)"
+          :locale="$i18n.locale as SupportedLocale"
           color="fat"
         />
       </div>

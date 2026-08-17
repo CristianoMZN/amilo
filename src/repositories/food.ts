@@ -17,11 +17,7 @@ export {
   upsertFoodTranslation,
 } from './foodTranslation';
 
-async function query<T>(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+async function query<T>(conn: DbConnection, sql: string, params: unknown[] = []): Promise<T[]> {
   const db = (await conn.getDb()) as {
     query: (sql: string, params?: unknown[]) => Promise<{ values?: T[]; rows?: { _array?: T[] } }>;
   };
@@ -29,11 +25,7 @@ async function query<T>(
   return result.values ?? result.rows?._array ?? [];
 }
 
-async function exec(
-  conn: DbConnection,
-  sql: string,
-  params: unknown[] = [],
-): Promise<void> {
+async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Promise<void> {
   const db = (await conn.getDb()) as {
     execute: (sql: string, params?: unknown[]) => Promise<unknown>;
   };
@@ -76,10 +68,7 @@ function rowToFood(row: FoodRow): Food {
   };
 }
 
-export async function findFoodById(
-  conn: DbConnection,
-  id: string,
-): Promise<Food | null> {
+export async function findFoodById(conn: DbConnection, id: string): Promise<Food | null> {
   const rows = await query<FoodRow>(conn, 'SELECT * FROM food WHERE id = ?', [id]);
   const row = rows[0];
   return row ? rowToFood(row) : null;
@@ -126,15 +115,10 @@ async function listFoodsWithNames(
   return foods.map((f) => ({ ...f, name: nameById.get(f.id) ?? '' }));
 }
 
-export async function listFoods(
-  conn: DbConnection,
-  opts: { origin: FoodOrigin },
-): Promise<Food[]> {
-  const rows = await query<FoodRow>(
-    conn,
-    'SELECT * FROM food WHERE origin = ? ORDER BY id ASC',
-    [opts.origin],
-  );
+export async function listFoods(conn: DbConnection, opts: { origin: FoodOrigin }): Promise<Food[]> {
+  const rows = await query<FoodRow>(conn, 'SELECT * FROM food WHERE origin = ? ORDER BY id ASC', [
+    opts.origin,
+  ]);
   return rows.map(rowToFood);
 }
 

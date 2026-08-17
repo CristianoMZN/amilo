@@ -73,14 +73,8 @@ describe('compareVolume', () => {
   });
 
   it('sums across multiple sets on each side', () => {
-    const prev = [
-      makeSet({ reps: 10, weightKg: 70 }),
-      makeSet({ reps: 8, weightKg: 70 }),
-    ];
-    const curr = [
-      makeSet({ reps: 10, weightKg: 72.5 }),
-      makeSet({ reps: 8, weightKg: 72.5 }),
-    ];
+    const prev = [makeSet({ reps: 10, weightKg: 70 }), makeSet({ reps: 8, weightKg: 70 })];
+    const curr = [makeSet({ reps: 10, weightKg: 72.5 }), makeSet({ reps: 8, weightKg: 72.5 })];
     // prev total: 10*70 + 8*70 = 700 + 560 = 1260
     // curr total: 10*72.5 + 8*72.5 = 725 + 580 = 1305
     // delta = 1305 - 1260 = 45

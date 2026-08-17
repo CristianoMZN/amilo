@@ -8,16 +8,7 @@ import {
 import type { SupportedLocale } from 'src/domain/types';
 import type { DbConnection } from 'src/database/connection';
 
-const ALL_LOCALES: readonly SupportedLocale[] = [
-  'en',
-  'es',
-  'pt-BR',
-  'de',
-  'fr',
-  'ja',
-  'ko',
-  'it',
-];
+const ALL_LOCALES: readonly SupportedLocale[] = ['en', 'es', 'pt-BR', 'de', 'fr', 'ja', 'ko', 'it'];
 
 describe('OFFICIAL_FOODS — structural integrity', () => {
   it('has at least 50 entries', () => {
@@ -127,9 +118,7 @@ describe('OFFICIAL_MEAL_TYPES', () => {
 describe('OFFICIAL_MEAL_TYPE_TRANSLATIONS', () => {
   it('every meal type has translations in all 8 locales', () => {
     for (const mt of OFFICIAL_MEAL_TYPES) {
-      const matching = OFFICIAL_MEAL_TYPE_TRANSLATIONS.filter(
-        (t) => t.mealTypeId === mt.id,
-      );
+      const matching = OFFICIAL_MEAL_TYPE_TRANSLATIONS.filter((t) => t.mealTypeId === mt.id);
       expect(matching).toHaveLength(ALL_LOCALES.length);
       for (const t of matching) {
         expect(ALL_LOCALES).toContain(t.locale);
@@ -208,9 +197,7 @@ class FakeSeedConnection implements DbConnection {
           row[col] = values[i];
         });
         const pkCols = FakeSeedConnection.PRIMARY_KEYS[table] ?? [cols[0] ?? ''];
-        const exists = list.some((existing) =>
-          pkCols.every((col) => existing[col] === row[col]),
-        );
+        const exists = list.some((existing) => pkCols.every((col) => existing[col] === row[col]));
         if (exists) return Promise.resolve({ changes: { changes: 0 }, rows: [] });
         list.push(row);
         return Promise.resolve({ changes: { changes: 1 }, rows: [] });
