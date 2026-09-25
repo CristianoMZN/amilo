@@ -4,8 +4,8 @@ import { messages } from 'src/i18n';
 describe('Amilo localized branding', () => {
   it.each(Object.entries(messages))('%s uses the current app name', (_locale, localeMessages) => {
     expect(localeMessages.app.name).toBe('Amilo');
-    expect(localeMessages.onboarding.welcome.title).not.toContain('Amilio');
-    expect(localeMessages.onboarding.summary.finish).not.toContain('Amilio');
+    expect(localeMessages.onboarding.welcome.title).toContain('Amilo');
+    expect(localeMessages.onboarding.summary.finish).toContain('Amilo');
   });
 
   it('uses localized exercise and workout navigation labels', () => {
