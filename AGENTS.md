@@ -1,4 +1,4 @@
-# AGENTS.md — Amilio App (Quasar Vite + Vue 3 + TS)
+# AGENTS.md — Amilo (Quasar Vite + Vue 3 + TS)
 
 Repo-specific guidance for OpenCode/agent sessions. Skip generic Vue/TS advice.
 

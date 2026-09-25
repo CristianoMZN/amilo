@@ -1,8 +1,8 @@
 {
-  "name": "amilio",
+  "name": "amilo",
   "version": "0.0.1",
-  "description": "A Quasar Project",
-  "productName": "Amilio App",
+  "description": "Amilo — local tracking for nutrition, hydration, weight, and training",
+  "productName": "Amilo",
   "author": "Cristiano Mozena <past.kun@gmail.com>",
   "type": "module",
   "private": true,

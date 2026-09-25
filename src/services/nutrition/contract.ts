@@ -1,4 +1,4 @@
-// Public service contract for the Amilio food module.
+// Public service contract for the Amilo food module.
 //
 // Vue components and Pinia stores depend on this TypeScript interface
 // (not on the implementation). One real implementation lives in

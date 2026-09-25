@@ -2,14 +2,14 @@ import type { MessageSchema } from '../schema';
 
 const ko: MessageSchema = {
   app: {
-    name: 'Amilio',
+    name: 'Amilo',
     tagline: '영양과 트레이닝을 기기 안에서 관리하세요',
   },
   nav: {
     home: '홈',
     nutrition: '영양',
-    exercise: 'Exercises',
-    workout: 'Workouts',
+    exercise: '운동',
+    workout: '운동',
     manage: '관리',
     onboarding: '시작하기',
     settings: '설정',
@@ -53,7 +53,7 @@ const ko: MessageSchema = {
   },
   onboarding: {
     welcome: {
-      title: 'Amilio에 오신 것을 환영합니다',
+      title: 'Amilo에 오신 것을 환영합니다',
       subtitle: '영양, 운동, 변화를 모두 기기에서 기록하세요.',
       cta: '시작하기',
     },
@@ -129,7 +129,7 @@ const ko: MessageSchema = {
       goalLabel: '목표',
       activityLabel: '활동량',
       estimateNotice: '대사 수치는 추정치이며 임상적 측정이 아닙니다.',
-      finish: 'Amilio 시작',
+      finish: 'Amilo 시작',
     },
     errors: {
       nameRequired: '어떻게 부를지 알려주세요.',

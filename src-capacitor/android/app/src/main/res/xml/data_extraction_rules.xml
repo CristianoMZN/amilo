@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Amilio stores all user data in the local SQLite database. We explicitly
+  Amilo stores all user data in the local SQLite database. We explicitly
   exclude it from cloud backup and device transfer so the user's private
   data stays on the device.
 -->

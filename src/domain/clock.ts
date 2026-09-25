@@ -1,4 +1,4 @@
-// Single source of truth for "what time is it now" within Amilio.
+// Single source of truth for "what time is it now" within Amilo.
 //
 // Components and repositories must NEVER call `new Date()` directly for
 // anything that affects date bucketing or persistence. Instead they call

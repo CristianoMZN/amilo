@@ -22,12 +22,12 @@ export default boot(() => {
         await applySeed(conn);
       } catch (err: unknown) {
         // A failed seed must not prevent app startup — log and continue.
-        console.warn('[Amilio] Bundled food seed failed; continuing without it.', err);
+        console.warn('[Amilo] Bundled food seed failed; continuing without it.', err);
       }
       appStore.markDatabaseReady();
     })
     .catch((err: unknown) => {
       appStore.markDatabaseError(err);
-      console.error('[Amilio] Failed to initialise database', err);
+      console.error('[Amilo] Failed to initialise database', err);
     });
 });
