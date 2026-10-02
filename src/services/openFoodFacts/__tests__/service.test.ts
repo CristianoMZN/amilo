@@ -117,9 +117,9 @@ describe('openFoodFactsService', () => {
       locale: 'en',
       query: 'broken',
     });
+    const expectation = expect(promise).rejects.toThrow(OPEN_FOOD_FACTS_CONNECTION_ERROR);
     await vi.advanceTimersByTimeAsync(2000);
-
-    await expect(promise).rejects.toThrow(OPEN_FOOD_FACTS_CONNECTION_ERROR);
+    await expectation;
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

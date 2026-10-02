@@ -172,7 +172,6 @@ export async function searchFoods(
     'SELECT food_id, name FROM food_translation WHERE locale = ? AND search LIKE ? ORDER BY food_id ASC',
     [opts.locale, pattern],
   );
-  if (translations.length === 0) return [];
 
   // Step 2: optional origin filter — fetch the candidate ids and intersect.
   let allowedIds: Set<string> | null = null;
