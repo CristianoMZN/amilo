@@ -109,6 +109,10 @@ export type MealTypeId = 'breakfast' | 'lunch' | 'snack' | 'dinner' | 'supper' |
 export interface Food {
   id: string;
   origin: FoodOrigin;
+  externalSource?: 'open_food_facts' | null;
+  externalId?: string | null;
+  barcode?: string | null;
+  brand?: string | null;
   baseAmountG: number;
   baseUnit: FoodBaseUnit;
   kcal: number;

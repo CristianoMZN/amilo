@@ -51,6 +51,10 @@ export async function createTestDb(): Promise<TestDb> {
 export interface SeedFood {
   id: string;
   origin: 'official' | 'custom';
+  externalSource?: 'open_food_facts' | null;
+  externalId?: string | null;
+  barcode?: string | null;
+  brand?: string | null;
   baseAmountG: number;
   baseUnit: 'g' | 'ml';
   kcal: number;
@@ -65,11 +69,16 @@ export interface SeedFood {
 export async function insertFoodRow(db: TestDb, food: SeedFood): Promise<void> {
   await db.exec(
     `INSERT OR IGNORE INTO food
-       (id, origin, base_amount_g, base_unit, kcal, protein_g, carbs_g, fat_g, fiber_g, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, origin, external_source, external_id, barcode, brand,
+        base_amount_g, base_unit, kcal, protein_g, carbs_g, fat_g, fiber_g, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       food.id,
       food.origin,
+      food.externalSource ?? null,
+      food.externalId ?? null,
+      food.barcode ?? null,
+      food.brand ?? null,
       food.baseAmountG,
       food.baseUnit,
       food.kcal,

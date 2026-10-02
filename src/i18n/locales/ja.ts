@@ -244,6 +244,7 @@ const ja: MessageSchema = {
       custom: 'カスタム',
       originOfficial: 'ライブラリから',
       originCustom: 'あなたのカスタム食品から',
+      originExternal: 'Open Food Facts',
       perBase: '{base}あたり',
     },
     addFood: {
@@ -258,12 +259,17 @@ const ja: MessageSchema = {
       livePreview: '栄養プレビュー',
       perBase100: '100 gあたり',
       invalidAmount: '0より大きい分量を入力してください。',
+      importingLocal: 'Criando alimento localmente...',
     },
     customFood: {
       titleNew: '新しいカスタム食品',
       titleEdit: 'カスタム食品を編集',
+      externalLookupLabel: 'Search Open Food Facts',
+      externalLookupPlaceholder: 'Search by name or barcode',
       nameLabel: '名前',
       namePlaceholder: '例：自家製グラノーラ',
+      barcodeLabel: 'Barcode',
+      brandLabel: 'Brand',
       baseAmountLabel: '基準量',
       baseUnitLabel: '基準単位',
       unitG: 'g',
@@ -279,6 +285,9 @@ const ja: MessageSchema = {
       deleteConfirm: 'このカスタム食品を削除しますか？',
       errorNameRequired: '名前を入力してください。',
       errorInvalidNumbers: '数値は正しい形式で入力してください。',
+    },
+    off: {
+      connectionError: 'Problema ao conectar com a API. Verifique a conexão com internet.',
     },
     favorites: {
       title: 'お気に入り',

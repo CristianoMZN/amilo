@@ -245,6 +245,7 @@ const de: MessageSchema = {
       custom: 'Eigene',
       originOfficial: 'Aus der Bibliothek',
       originCustom: 'Aus deinen eigenen Lebensmitteln',
+      originExternal: 'Open Food Facts',
       perBase: 'pro {base}',
     },
     addFood: {
@@ -259,12 +260,17 @@ const de: MessageSchema = {
       livePreview: 'Nährwert-Vorschau',
       perBase100: 'pro 100 g',
       invalidAmount: 'Gib eine Menge größer als null ein.',
+      importingLocal: 'Criando alimento localmente...',
     },
     customFood: {
       titleNew: 'Neues eigenes Lebensmittel',
       titleEdit: 'Eigenes Lebensmittel bearbeiten',
+      externalLookupLabel: 'Search Open Food Facts',
+      externalLookupPlaceholder: 'Search by name or barcode',
       nameLabel: 'Name',
       namePlaceholder: 'Z. B. Hausgemachtes Müsli',
+      barcodeLabel: 'Barcode',
+      brandLabel: 'Brand',
       baseAmountLabel: 'Basismenge',
       baseUnitLabel: 'Basiseinheit',
       unitG: 'g',
@@ -280,6 +286,9 @@ const de: MessageSchema = {
       deleteConfirm: 'Dieses eigene Lebensmittel löschen?',
       errorNameRequired: 'Bitte gib einen Namen an.',
       errorInvalidNumbers: 'Zahlenwerte müssen gültig sein.',
+    },
+    off: {
+      connectionError: 'Problema ao conectar com a API. Verifique a conexão com internet.',
     },
     favorites: {
       title: 'Favoriten',

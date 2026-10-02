@@ -17,6 +17,10 @@ const STUB_COLUMNS: Record<string, readonly string[]> = {
   food: [
     'id',
     'origin',
+    'external_source',
+    'external_id',
+    'barcode',
+    'brand',
     'base_amount_g',
     'base_unit',
     'kcal',

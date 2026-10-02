@@ -4,6 +4,7 @@
 import migration001 from './001_init.sql?raw';
 import migration002 from './002_nutrition.sql?raw';
 import migration003 from './003_exercises_workouts.sql?raw';
+import migration004 from './004_open_food_facts.sql?raw';
 
 export interface Migration {
   version: number;
@@ -26,6 +27,11 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 3,
     description: 'Sprint 3: exercises, aerobic activities, workout sheets, performed workouts',
     sql: migration003,
+  },
+  {
+    version: 4,
+    description: 'Nutrition: Open Food Facts metadata',
+    sql: migration004,
   },
 ] as const;
 

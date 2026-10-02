@@ -245,6 +245,7 @@ export interface AppMessages {
       custom: string;
       originOfficial: string;
       originCustom: string;
+      originExternal: string;
       perBase: string;
     };
     addFood: {
@@ -259,12 +260,17 @@ export interface AppMessages {
       livePreview: string;
       perBase100: string;
       invalidAmount: string;
+      importingLocal: string;
     };
     customFood: {
       titleNew: string;
       titleEdit: string;
+      externalLookupLabel: string;
+      externalLookupPlaceholder: string;
       nameLabel: string;
       namePlaceholder: string;
+      barcodeLabel: string;
+      brandLabel: string;
       baseAmountLabel: string;
       baseUnitLabel: string;
       unitG: string;
@@ -280,6 +286,9 @@ export interface AppMessages {
       deleteConfirm: string;
       errorNameRequired: string;
       errorInvalidNumbers: string;
+    };
+    off: {
+      connectionError: string;
     };
     favorites: {
       title: string;

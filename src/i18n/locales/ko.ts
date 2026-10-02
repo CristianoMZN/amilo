@@ -244,6 +244,7 @@ const ko: MessageSchema = {
       custom: '사용자',
       originOfficial: '라이브러리에서',
       originCustom: '내 사용자 식품에서',
+      originExternal: 'Open Food Facts',
       perBase: '{base}당',
     },
     addFood: {
@@ -258,12 +259,17 @@ const ko: MessageSchema = {
       livePreview: '영양 미리보기',
       perBase100: '100 g당',
       invalidAmount: '0보다 큰 분량을 입력하세요.',
+      importingLocal: 'Criando alimento localmente...',
     },
     customFood: {
       titleNew: '새 사용자 식품',
       titleEdit: '사용자 식품 편집',
+      externalLookupLabel: 'Search Open Food Facts',
+      externalLookupPlaceholder: 'Search by name or barcode',
       nameLabel: '이름',
       namePlaceholder: '예: 수제 그래놀라',
+      barcodeLabel: 'Barcode',
+      brandLabel: 'Brand',
       baseAmountLabel: '기준량',
       baseUnitLabel: '기준 단위',
       unitG: 'g',
@@ -279,6 +285,9 @@ const ko: MessageSchema = {
       deleteConfirm: '이 사용자 식품을 삭제할까요?',
       errorNameRequired: '이름을 입력해 주세요.',
       errorInvalidNumbers: '숫자 값을 올바르게 입력해 주세요.',
+    },
+    off: {
+      connectionError: 'Problema ao conectar com a API. Verifique a conexão com internet.',
     },
     favorites: {
       title: '즐겨찾기',

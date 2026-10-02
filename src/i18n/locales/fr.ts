@@ -246,6 +246,7 @@ const fr: MessageSchema = {
       custom: 'Personnalisés',
       originOfficial: 'Depuis la bibliothèque',
       originCustom: 'Depuis vos aliments personnalisés',
+      originExternal: 'Open Food Facts',
       perBase: 'pour {base}',
     },
     addFood: {
@@ -260,12 +261,17 @@ const fr: MessageSchema = {
       livePreview: 'Aperçu nutritionnel',
       perBase100: 'pour 100 g',
       invalidAmount: 'Saisissez une quantité supérieure à zéro.',
+      importingLocal: 'Criando alimento localmente...',
     },
     customFood: {
       titleNew: 'Nouvel aliment personnalisé',
       titleEdit: 'Modifier l’aliment personnalisé',
+      externalLookupLabel: 'Search Open Food Facts',
+      externalLookupPlaceholder: 'Search by name or barcode',
       nameLabel: 'Nom',
       namePlaceholder: 'Ex. : granola maison',
+      barcodeLabel: 'Barcode',
+      brandLabel: 'Brand',
       baseAmountLabel: 'Quantité de base',
       baseUnitLabel: 'Unité de base',
       unitG: 'g',
@@ -281,6 +287,9 @@ const fr: MessageSchema = {
       deleteConfirm: 'Supprimer cet aliment personnalisé ?',
       errorNameRequired: 'Veuillez saisir un nom.',
       errorInvalidNumbers: 'Les valeurs numériques doivent être valides.',
+    },
+    off: {
+      connectionError: 'Problema ao conectar com a API. Verifique a conexão com internet.',
     },
     favorites: {
       title: 'Favoris',

@@ -114,13 +114,18 @@ export async function applySeed(conn: DbConnection): Promise<void> {
     await exec(
       conn,
       `INSERT OR IGNORE INTO food
-         (id, origin, base_amount_g, base_unit, kcal,
+         (id, origin, external_source, external_id, barcode, brand,
+          base_amount_g, base_unit, kcal,
           protein_g, carbs_g, fat_g, fiber_g,
           created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         seed.food.id,
         seed.food.origin,
+        seed.food.externalSource ?? null,
+        seed.food.externalId ?? null,
+        seed.food.barcode ?? null,
+        seed.food.brand ?? null,
         seed.food.baseAmountG,
         seed.food.baseUnit,
         seed.food.kcal,
