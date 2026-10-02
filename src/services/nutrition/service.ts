@@ -25,6 +25,8 @@ import { suggestTargetsFromProfile } from 'src/domain/targets';
 import { nowIso } from 'src/util/dateDay';
 import { normalizeForSearch } from 'src/util/search';
 import type { DbConnection } from 'src/database/connection';
+import { openFoodFactsService } from 'src/services/openFoodFacts';
+import type { ExternalFood } from 'src/services/openFoodFacts';
 
 import type {
   MealTypeChip,
@@ -102,6 +104,20 @@ async function resolveFoodName(
 
 void resolveFoodName; // keep exported-style helper in module for tests; suppress unused warning
 void snapshotForFood;
+
+function sanitizeFoodIdSegment(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80);
+}
+
+function buildImportedFoodId(food: ExternalFood): string {
+  const key = sanitizeFoodIdSegment(food.barcode ?? food.externalId);
+  return key.length > 0 ? `food:off:${key}` : `food:off:${food.externalId}`;
+}
 
 // -----------------------------------------------------------------------
 // NutritionService implementation
@@ -186,6 +202,10 @@ export const nutritionService: NutritionService = {
     const food: Food = {
       id: args.id,
       origin: 'custom',
+      externalSource: args.externalSource ?? null,
+      externalId: args.externalId ?? null,
+      barcode: args.barcode ?? null,
+      brand: args.brand ?? null,
       baseAmountG: args.baseAmountG,
       baseUnit: args.baseUnit,
       kcal: args.kcal,
@@ -213,6 +233,10 @@ export const nutritionService: NutritionService = {
     }
     const updated: Food = {
       ...existing,
+      externalSource: args.externalSource ?? existing.externalSource ?? null,
+      externalId: args.externalId ?? existing.externalId ?? null,
+      barcode: args.barcode ?? existing.barcode ?? null,
+      brand: args.brand ?? existing.brand ?? null,
       baseAmountG: args.baseAmountG,
       baseUnit: args.baseUnit,
       kcal: args.kcal,
@@ -229,6 +253,69 @@ export const nutritionService: NutritionService = {
       name: args.name,
       search: normalizeForSearch(args.name),
     });
+  },
+
+  async importExternalFood(conn, args) {
+    const barcode = args.food.barcode?.trim();
+    const existing =
+      (barcode ? await foodRepo.findFoodByBarcode(conn, barcode) : null) ??
+      (await foodRepo.findFoodByExternalIdentity(conn, args.food.source, args.food.externalId));
+    if (existing) {
+      await foodRepo.upsertFoodTranslation(conn, {
+        foodId: existing.id,
+        locale: args.locale,
+        name: args.food.name,
+        search: normalizeForSearch(args.food.name),
+      });
+      return existing;
+    }
+
+    const now = nowIso();
+    const food: Food = {
+      id: buildImportedFoodId(args.food),
+      origin: 'custom',
+      externalSource: args.food.source,
+      externalId: args.food.externalId,
+      barcode: args.food.barcode,
+      brand: args.food.brand,
+      baseAmountG: args.food.baseAmountG,
+      baseUnit: args.food.baseUnit,
+      kcal: args.food.kcal,
+      proteinG: args.food.proteinG,
+      carbsG: args.food.carbsG,
+      fatG: args.food.fatG,
+      fiberG: args.food.fiberG,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await foodRepo.insertFood(conn, food);
+    await foodRepo.upsertFoodTranslation(conn, {
+      foodId: food.id,
+      locale: args.locale,
+      name: args.food.name,
+      search: normalizeForSearch(args.food.name),
+    });
+    return food;
+  },
+
+  async resolveFoodByBarcode(conn, args) {
+    const barcode = args.barcode.trim();
+    if (barcode.length === 0) return null;
+    const local = await foodRepo.findFoodByBarcode(conn, barcode);
+    if (local) {
+      const name = await resolveFoodName(conn, local.id, args.locale);
+      return { ...local, name };
+    }
+    const external = await openFoodFactsService.findByBarcode({
+      locale: args.locale,
+      barcode,
+    });
+    if (!external) return null;
+    const imported = await nutritionService.importExternalFood(conn, {
+      food: external,
+      locale: args.locale,
+    });
+    return { ...imported, name: external.name };
   },
 
   async deleteCustomFood(conn, args) {

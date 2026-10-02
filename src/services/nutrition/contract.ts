@@ -28,6 +28,7 @@ import type {
 } from 'src/domain/types';
 import type { DbConnection } from 'src/database/connection';
 import type { MealWithItems } from 'src/repositories/meal';
+import type { ExternalFood } from 'src/services/openFoodFacts';
 
 export interface MealItemInput {
   foodId: string;
@@ -65,6 +66,10 @@ export interface CreateCustomFoodInput {
   id: string; // caller-supplied stable id, e.g. 'food:user:<uuid>'
   name: string; // name is created in the active locale only
   locale: SupportedLocale;
+  externalSource?: Food['externalSource'];
+  externalId?: string | null;
+  barcode?: string | null;
+  brand?: string | null;
   baseAmountG: number;
   baseUnit: FoodBaseUnit;
   kcal: number;
@@ -122,6 +127,16 @@ export interface NutritionService {
   updateCustomFood(conn: DbConnection, args: UpdateCustomFoodInput): Promise<void>;
 
   deleteCustomFood(conn: DbConnection, args: { id: string }): Promise<void>;
+
+  importExternalFood(
+    conn: DbConnection,
+    args: { food: ExternalFood; locale: SupportedLocale },
+  ): Promise<Food>;
+
+  resolveFoodByBarcode(
+    conn: DbConnection,
+    args: { barcode: string; locale: SupportedLocale },
+  ): Promise<(Food & { name: string }) | null>;
 
   // ----- Add / edit / remove meal items -----
 

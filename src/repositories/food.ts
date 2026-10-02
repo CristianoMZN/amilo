@@ -7,6 +7,7 @@ import type { DbConnection } from '../database/connection';
 import type { Food, FoodOrigin, SupportedLocale } from 'src/domain/types';
 import { nowIso } from 'src/util/dateDay';
 import { normalizeForSearch } from 'src/util/search';
+import { findAnyTranslation, findFoodTranslation } from './foodTranslation';
 
 // Re-export the translation CRUD so callers can import everything from
 // `./food`. The implementation lives in `./foodTranslation.ts`.
@@ -35,6 +36,10 @@ async function exec(conn: DbConnection, sql: string, params: unknown[] = []): Pr
 interface FoodRow {
   id: string;
   origin: FoodOrigin;
+  external_source: string | null;
+  external_id: string | null;
+  barcode: string | null;
+  brand: string | null;
   base_amount_g: number;
   base_unit: Food['baseUnit'];
   kcal: number;
@@ -56,6 +61,10 @@ function rowToFood(row: FoodRow): Food {
   return {
     id: row.id,
     origin: row.origin,
+    externalSource: row.external_source,
+    externalId: row.external_id,
+    barcode: row.barcode,
+    brand: row.brand,
     baseAmountG: row.base_amount_g,
     baseUnit: row.base_unit,
     kcal: row.kcal,
@@ -122,6 +131,28 @@ export async function listFoods(conn: DbConnection, opts: { origin: FoodOrigin }
   return rows.map(rowToFood);
 }
 
+export async function findFoodByBarcode(conn: DbConnection, barcode: string): Promise<Food | null> {
+  const rows = await query<FoodRow>(conn, 'SELECT * FROM food WHERE barcode = ? ORDER BY id ASC', [
+    barcode,
+  ]);
+  const row = rows[0];
+  return row ? rowToFood(row) : null;
+}
+
+export async function findFoodByExternalIdentity(
+  conn: DbConnection,
+  externalSource: NonNullable<Food['externalSource']>,
+  externalId: string,
+): Promise<Food | null> {
+  const rows = await query<FoodRow>(
+    conn,
+    'SELECT * FROM food WHERE external_source = ? AND external_id = ? ORDER BY id ASC',
+    [externalSource, externalId],
+  );
+  const row = rows[0];
+  return row ? rowToFood(row) : null;
+}
+
 export async function searchFoods(
   conn: DbConnection,
   opts: {
@@ -157,25 +188,50 @@ export async function searchFoods(
   const filtered = allowedIds
     ? translations.filter((t) => allowedIds?.has(t.food_id) ?? false)
     : translations;
-  if (filtered.length === 0) return [];
 
   // Step 3: pair each translation with its food row. The stub can't do
   // JOIN, so we fetch the food rows once and build a map.
   const foodRows = await query<FoodRow>(conn, 'SELECT * FROM food ORDER BY id ASC');
   const foodById = new Map(foodRows.map((r) => [r.id, rowToFood(r)]));
 
-  const result: Array<Food & { name: string }> = [];
+  const resultById = new Map<string, Food & { name: string }>();
   for (const t of filtered) {
     const food = foodById.get(t.food_id);
     if (food) {
-      result.push({ ...food, name: t.name });
+      resultById.set(food.id, { ...food, name: t.name });
+    }
+  }
+
+  if (/^\d{6,18}$/.test(normalized)) {
+    const barcodeRows = await query<FoodRow>(
+      conn,
+      'SELECT * FROM food WHERE barcode = ? ORDER BY id ASC',
+      [normalized],
+    );
+    for (const row of barcodeRows) {
+      const food = rowToFood(row);
+      if (allowedIds && !allowedIds.has(food.id)) continue;
+      if (resultById.has(food.id)) continue;
+      resultById.set(food.id, { ...food, name: await findFoodDisplayName(conn, food.id, opts.locale) });
     }
   }
 
   // The dev stub does not support LIMIT. The native engine enforces the
   // cap; the stub returns every match. The caller can still apply a
   // best-effort in-code slice so behaviour stays predictable.
+  const result = [...resultById.values()];
   return opts.limit ? result.slice(0, opts.limit) : result;
+}
+
+async function findFoodDisplayName(
+  conn: DbConnection,
+  foodId: string,
+  locale: SupportedLocale,
+): Promise<string> {
+  const tr = await findFoodTranslation(conn, foodId, locale);
+  if (tr) return tr.name;
+  const fallback = await findAnyTranslation(conn, foodId);
+  return fallback?.name ?? foodId;
 }
 
 export async function insertFood(conn: DbConnection, food: Food): Promise<Food> {
@@ -187,10 +243,15 @@ export async function insertFood(conn: DbConnection, food: Food): Promise<Food> 
   await exec(
     conn,
     `INSERT INTO food
-       (id, origin, base_amount_g, base_unit, kcal, protein_g, carbs_g, fat_g, fiber_g, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (id, origin, external_source, external_id, barcode, brand,
+       base_amount_g, base_unit, kcal, protein_g, carbs_g, fat_g, fiber_g, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        origin = excluded.origin,
+       external_source = excluded.external_source,
+       external_id = excluded.external_id,
+       barcode = excluded.barcode,
+       brand = excluded.brand,
        base_amount_g = excluded.base_amount_g,
        base_unit = excluded.base_unit,
        kcal = excluded.kcal,
@@ -202,6 +263,10 @@ export async function insertFood(conn: DbConnection, food: Food): Promise<Food> 
     [
       food.id,
       food.origin,
+      food.externalSource ?? null,
+      food.externalId ?? null,
+      food.barcode ?? null,
+      food.brand ?? null,
       food.baseAmountG,
       food.baseUnit,
       food.kcal,
@@ -222,6 +287,10 @@ export async function updateFood(conn: DbConnection, food: Food): Promise<void> 
     conn,
     `UPDATE food SET
        origin = ?,
+       external_source = ?,
+       external_id = ?,
+       barcode = ?,
+       brand = ?,
        base_amount_g = ?,
        base_unit = ?,
        kcal = ?,
@@ -233,6 +302,10 @@ export async function updateFood(conn: DbConnection, food: Food): Promise<void> 
      WHERE id = ?`,
     [
       food.origin,
+      food.externalSource ?? null,
+      food.externalId ?? null,
+      food.barcode ?? null,
+      food.brand ?? null,
       food.baseAmountG,
       food.baseUnit,
       food.kcal,

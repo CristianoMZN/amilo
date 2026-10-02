@@ -54,13 +54,28 @@
                   {{ formatKcal(food.kcal, locale) }} / {{ food.baseAmountG }}
                   {{ unitLabel(food.baseUnit) }}
                 </q-item-label>
+                <q-item-label v-if="food.source === 'open_food_facts' && food.brand" caption>
+                  {{ food.brand }}
+                </q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-icon
-                  v-if="food.origin === 'custom'"
-                  name="person"
+                  v-if="food.source === 'open_food_facts'"
+                  name="public"
+                  color="primary"
                   size="18px"
-                  :title="t('nutrition.food.originCustom')"
+                  :title="t('nutrition.food.originExternal')"
+                />
+                <q-icon
+                  v-else
+                  name="check_circle"
+                  color="positive"
+                  size="18px"
+                  :title="
+                    food.origin === 'custom'
+                      ? t('nutrition.food.originCustom')
+                      : t('nutrition.food.originOfficial')
+                  "
                 />
               </q-item-section>
             </q-item>
@@ -122,15 +137,23 @@ import { useI18n } from 'vue-i18n';
 import { Notify } from 'quasar';
 import type { Food, FoodBaseUnit, MealItem, MealTypeId, SupportedLocale } from 'src/domain/types';
 import { scaleFromBase } from 'src/domain/nutrition';
+import { normalizeForSearch } from 'src/util/search';
 import { formatKcal, formatMacroGrams } from 'src/util/format';
 import { getDatabase } from 'src/database/database';
 import { nutritionService } from 'src/services/nutrition';
+import type { ExternalFood } from 'src/services/openFoodFacts';
+import { openFoodFactsService } from 'src/services/openFoodFacts';
 import { useNutritionStore } from 'src/stores/nutrition';
 
 import QuantityInput from './QuantityInput.vue';
 
 interface FoodWithName extends Food {
   name: string;
+}
+
+interface SearchResult extends FoodWithName {
+  source: 'local' | 'open_food_facts';
+  externalFood?: ExternalFood;
 }
 
 const props = defineProps<{
@@ -152,21 +175,30 @@ const open = defineModel<boolean>({ required: true });
 
 const tab = ref<'recents' | 'favorites' | 'all'>('recents');
 const query = ref<string>('');
-const allFoods = ref<FoodWithName[]>([]);
-const recents = ref<FoodWithName[]>([]);
-const favorites = ref<FoodWithName[]>([]);
-const selected = ref<FoodWithName | null>(null);
+const allFoods = ref<SearchResult[]>([]);
+const externalFoods = ref<SearchResult[]>([]);
+const recents = ref<SearchResult[]>([]);
+const favorites = ref<SearchResult[]>([]);
+const selected = ref<SearchResult | null>(null);
 const amount = ref<number>(100);
 const units = ref<{ id: MealTypeId; name: string }[]>([]);
+let externalSearchTimer: ReturnType<typeof setTimeout> | null = null;
+let searchToken = 0;
+const externalSearchCache = new Map<string, SearchResult[]>();
 
 watch(open, (val) => {
   if (val) {
+    searchToken += 1;
+    if (externalSearchTimer) {
+      clearTimeout(externalSearchTimer);
+      externalSearchTimer = null;
+    }
     void loadAll();
     if (props.editingItem) {
       selected.value = {
         id: props.editingItem.foodId ?? '',
         name: props.editingItem.foodNameSnapshot,
-        origin: 'custom',
+        source: 'local',
         baseAmountG: 100,
         baseUnit: props.editingItem.unit,
         kcal: props.editingItem.kcalSnapshot,
@@ -174,6 +206,10 @@ watch(open, (val) => {
         carbsG: props.editingItem.carbsGSnapshot,
         fatG: props.editingItem.fatGSnapshot,
         fiberG: props.editingItem.fiberGSnapshot,
+        externalSource: null,
+        externalId: props.editingItem.foodId,
+        barcode: null,
+        brand: null,
         createdAt: props.editingItem.createdAt,
         updatedAt: props.editingItem.createdAt,
       };
@@ -184,22 +220,30 @@ watch(open, (val) => {
   }
 });
 
-watch(tab, () => {
-  // Trigger results refresh when tabs change.
-});
-
-watch(query, async (q) => {
-  if (q.length > 0) {
-    const conn = await getDatabase();
-    const out = await nutritionService.searchFoods(conn, {
-      locale: props.locale,
-      query: q,
-      limit: 30,
-    });
-    allFoods.value = out;
-  } else {
-    await loadAll();
+watch(query, (q) => {
+  searchToken += 1;
+  const token = searchToken;
+  if (externalSearchTimer) {
+    clearTimeout(externalSearchTimer);
+    externalSearchTimer = null;
   }
+  const trimmed = q.trim();
+  const barcodeCandidate = trimmed.replace(/[\s-]/g, '');
+  if (trimmed.length === 0) {
+    allFoods.value = [];
+    externalFoods.value = [];
+    selected.value = null;
+    void loadAll();
+    return;
+  }
+  if (/^\d{8,14}$/.test(barcodeCandidate)) {
+    void searchByBarcode(barcodeCandidate, token);
+    return;
+  }
+  void searchLocal(trimmed, token);
+  externalSearchTimer = setTimeout(() => {
+    void searchExternal(trimmed, token);
+  }, 2000);
 });
 
 async function loadAll(): Promise<void> {
@@ -209,14 +253,15 @@ async function loadAll(): Promise<void> {
     nutritionService.listFavoriteFoods(conn, { locale: props.locale }),
     nutritionService.searchFoods(conn, { locale: props.locale, query: '' }),
   ]);
-  recents.value = r;
-  favorites.value = f;
-  allFoods.value = o;
+  recents.value = r.map((food) => ({ ...food, source: 'local' }));
+  favorites.value = f.map((food) => ({ ...food, source: 'local' }));
+  allFoods.value = o.map((food) => ({ ...food, source: 'local' }));
+  externalFoods.value = [];
   units.value = props.mealTypeOptions.slice();
 }
 
-const results = computed<FoodWithName[]>(() => {
-  if (query.value.length > 0) return allFoods.value;
+const results = computed<SearchResult[]>(() => {
+  if (query.value.trim().length > 0) return [...allFoods.value, ...externalFoods.value];
   if (tab.value === 'favorites') return favorites.value;
   if (tab.value === 'all') return allFoods.value.slice(0, 50);
   return recents.value;
@@ -231,15 +276,159 @@ function unitLabel(u: FoodBaseUnit): string {
   return u === 'ml' ? t('units.ml') : t('units.g');
 }
 
-function pick(food: FoodWithName): void {
+async function pick(food: SearchResult): Promise<void> {
+  if (food.source === 'open_food_facts' && food.externalFood) {
+    await importExternalFood(food.externalFood);
+    return;
+  }
   selected.value = food;
   amount.value = 100;
+}
+
+async function importExternalFood(food: ExternalFood): Promise<void> {
+  Notify.create({
+    message: t('nutrition.addFood.importingLocal'),
+    color: 'primary',
+    position: 'bottom',
+    timeout: 1200,
+  });
+  const conn = await getDatabase();
+  const imported = await nutritionService.importExternalFood(conn, {
+    food,
+    locale: props.locale,
+  });
+  selected.value = {
+    ...imported,
+    name: food.name,
+    source: 'local',
+  };
+  amount.value = 100;
+  allFoods.value = [selected.value];
+  externalFoods.value = [];
+}
+
+async function searchLocal(queryText: string, token: number): Promise<void> {
+  const conn = await getDatabase();
+  const out = await nutritionService.searchFoods(conn, {
+    locale: props.locale,
+    query: queryText,
+    limit: 30,
+  });
+  if (token !== searchToken) return;
+  allFoods.value = out.map((food) => ({ ...food, source: 'local' }));
+  selected.value = out.length === 1 ? (allFoods.value[0] ?? null) : null;
+  if (selected.value) amount.value = 100;
+}
+
+async function searchByBarcode(barcode: string, token: number): Promise<void> {
+  const conn = await getDatabase();
+  const local = await nutritionService.searchFoods(conn, {
+    locale: props.locale,
+    query: barcode,
+    limit: 30,
+  });
+  if (token !== searchToken) return;
+  if (local.length > 0) {
+    allFoods.value = local.map((food) => ({ ...food, source: 'local' }));
+    externalFoods.value = [];
+    selected.value = local.length === 1 ? (allFoods.value[0] ?? null) : null;
+    if (selected.value) amount.value = 100;
+    return;
+  }
+  const external = await openFoodFactsService.findByBarcode({
+    locale: props.locale,
+    barcode,
+  });
+  if (token !== searchToken) return;
+  if (!external) {
+    allFoods.value = [];
+    externalFoods.value = [];
+    selected.value = null;
+    return;
+  }
+  allFoods.value = [];
+  externalFoods.value = [
+    {
+      id: `open-food-facts:${external.externalId}`,
+      name: external.name,
+      source: 'open_food_facts',
+      externalFood: external,
+      externalSource: null,
+      externalId: external.externalId,
+      barcode: external.barcode,
+      brand: external.brand,
+      baseAmountG: external.baseAmountG,
+      baseUnit: external.baseUnit,
+      kcal: external.kcal,
+      proteinG: external.proteinG,
+      carbsG: external.carbsG,
+      fatG: external.fatG,
+      fiberG: external.fiberG,
+      createdAt: '',
+      updatedAt: '',
+    },
+  ];
+  await importExternalFood(external);
+}
+
+async function searchExternal(queryText: string, token: number): Promise<void> {
+  const normalized = normalizeForSearch(queryText);
+  const cacheKey = `${openFoodFactsService.countryTagForLocale(props.locale)}:${normalized}`;
+  if (externalSearchCache.has(cacheKey)) {
+    const cached = externalSearchCache.get(cacheKey) ?? [];
+    if (token !== searchToken) return;
+    externalFoods.value = cached;
+    return;
+  }
+  try {
+    const externalResults = await openFoodFactsService.searchFoods({
+      locale: props.locale,
+      query: queryText,
+      pageSize: 20,
+    });
+    if (token !== searchToken) return;
+    const mapped = externalResults.map<SearchResult>((food) => ({
+      id: `open-food-facts:${food.externalId}`,
+      name: food.name,
+      source: 'open_food_facts',
+      externalFood: food,
+      externalSource: null,
+      externalId: food.externalId,
+      barcode: food.barcode,
+      brand: food.brand,
+      baseAmountG: food.baseAmountG,
+      baseUnit: food.baseUnit,
+      kcal: food.kcal,
+      proteinG: food.proteinG,
+      carbsG: food.carbsG,
+      fatG: food.fatG,
+      fiberG: food.fiberG,
+      createdAt: '',
+      updatedAt: '',
+    }));
+    externalSearchCache.set(cacheKey, mapped);
+    externalFoods.value = mapped;
+  } catch (err) {
+    if (token !== searchToken) return;
+    externalFoods.value = [];
+    Notify.create({
+      message: t('nutrition.off.connectionError'),
+      color: 'negative',
+      position: 'bottom',
+    });
+    void err;
+  }
 }
 
 async function commit(): Promise<void> {
   if (!selected.value) return;
   const conn = await getDatabase();
   try {
+    let selectedFood = selected.value;
+    if (selectedFood.source === 'open_food_facts' && selectedFood.externalFood) {
+      await importExternalFood(selectedFood.externalFood);
+      selectedFood = selected.value ?? selectedFood;
+    }
     if (props.editingItem) {
       await nutritionService.updateMealItemAmount(conn, {
         mealId: props.editingItem.mealId,
@@ -258,10 +447,10 @@ async function commit(): Promise<void> {
         mealTypeId: props.initialMealTypeId,
         customName: null,
         item: {
-          foodId: selected.value.id,
-          foodName: selected.value.name,
+          foodId: selectedFood.id,
+          foodName: selectedFood.name,
           amount: amount.value,
-          unit: selected.value.baseUnit,
+          unit: selectedFood.baseUnit,
         },
       });
       Notify.create({
@@ -288,6 +477,12 @@ function reset(): void {
   amount.value = 100;
   query.value = '';
   tab.value = 'recents';
+  allFoods.value = [];
+  externalFoods.value = [];
+  if (externalSearchTimer) {
+    clearTimeout(externalSearchTimer);
+    externalSearchTimer = null;
+  }
 }
 </script>
 

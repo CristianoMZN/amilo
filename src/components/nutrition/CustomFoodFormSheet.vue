@@ -17,6 +17,49 @@
       </q-card-section>
 
       <q-card-section class="custom-food__body">
+        <div class="custom-food__lookup">
+          <q-input
+            v-model="externalQuery"
+            outlined
+            dense
+            :label="t('nutrition.customFood.externalLookupLabel')"
+            :placeholder="t('nutrition.customFood.externalLookupPlaceholder')"
+            class="custom-food__lookup-input"
+            @keyup.enter="searchExternal"
+          >
+            <template #append>
+              <q-btn
+                flat
+                round
+                dense
+                icon="search"
+                :loading="searchingExternal"
+                @click="searchExternal"
+              />
+            </template>
+          </q-input>
+
+          <q-list v-if="externalResults.length" separator class="custom-food__results">
+            <q-item
+              v-for="food in externalResults"
+              :key="food.externalId"
+              clickable
+              v-ripple
+              @click="applyExternalFood(food)"
+            >
+              <q-item-section>
+                <q-item-label>{{ food.name }}</q-item-label>
+                <q-item-label caption>
+                  {{ food.brand ?? t('nutrition.food.originExternal') }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="public" color="primary" size="18px" />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
         <q-input
           v-model="name"
           outlined
@@ -27,6 +70,23 @@
           :error="!!errors.name"
           :error-message="errors.name"
         />
+
+        <div class="custom-food__row">
+          <q-input
+            v-model="barcode"
+            outlined
+            dense
+            :label="t('nutrition.customFood.barcodeLabel')"
+            class="custom-food__barcode"
+          />
+          <q-input
+            v-model="brand"
+            outlined
+            dense
+            :label="t('nutrition.customFood.brandLabel')"
+            class="custom-food__brand"
+          />
+        </div>
 
         <div class="custom-food__row">
           <q-input
@@ -157,6 +217,8 @@ import { useI18n } from 'vue-i18n';
 import type { Food, FoodBaseUnit, SupportedLocale } from 'src/domain/types';
 import { getDatabase } from 'src/database/database';
 import { nutritionService } from 'src/services/nutrition';
+import type { ExternalFood } from 'src/services/openFoodFacts';
+import { openFoodFactsService } from 'src/services/openFoodFacts';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -176,8 +238,14 @@ const open = defineModel<boolean>({ required: true });
 
 const saving = ref<boolean>(false);
 const editingCustom = ref<Food | null>(null);
+const externalQuery = ref<string>('');
+const externalResults = ref<ExternalFood[]>([]);
+const searchingExternal = ref<boolean>(false);
+const selectedExternal = ref<ExternalFood | null>(null);
 
 const name = ref<string>('');
+const barcode = ref<string>('');
+const brand = ref<string>('');
 const baseAmount = ref<number>(100);
 const baseUnit = ref<FoodBaseUnit>('g');
 const kcal = ref<number>(0);
@@ -185,6 +253,8 @@ const proteinG = ref<number>(0);
 const carbsG = ref<number>(0);
 const fatG = ref<number>(0);
 const fiberG = ref<number | null>(null);
+const externalSource = ref<Food['externalSource']>(null);
+const externalId = ref<string | null>(null);
 
 const isEditing = computed<boolean>(() => props.editingId !== null);
 
@@ -222,6 +292,9 @@ const errors = computed<Record<string, string>>(() => {
 
 watch(open, async (val) => {
   if (val) {
+    externalQuery.value = '';
+    externalResults.value = [];
+    selectedExternal.value = null;
     if (props.editingId) {
       await loadForEdit(props.editingId);
     } else {
@@ -245,6 +318,8 @@ async function loadForEdit(id: string): Promise<void> {
   }
   editingCustom.value = found;
   name.value = found.name;
+  barcode.value = found.barcode ?? '';
+  brand.value = found.brand ?? '';
   baseAmount.value = found.baseAmountG;
   baseUnit.value = found.baseUnit;
   kcal.value = found.kcal;
@@ -252,10 +327,17 @@ async function loadForEdit(id: string): Promise<void> {
   carbsG.value = found.carbsG;
   fatG.value = found.fatG;
   fiberG.value = found.fiberG;
+  externalSource.value = found.externalSource ?? null;
+  externalId.value = found.externalId ?? null;
+  selectedExternal.value = null;
+  externalQuery.value = '';
+  externalResults.value = [];
 }
 
 function reset(): void {
   name.value = '';
+  barcode.value = '';
+  brand.value = '';
   baseAmount.value = 100;
   baseUnit.value = 'g';
   kcal.value = 0;
@@ -264,6 +346,12 @@ function reset(): void {
   fatG.value = 0;
   fiberG.value = null;
   editingCustom.value = null;
+  externalSource.value = null;
+  externalId.value = null;
+  selectedExternal.value = null;
+  externalQuery.value = '';
+  externalResults.value = [];
+  searchingExternal.value = false;
 }
 
 function generateUserFoodId(): string {
@@ -274,37 +362,111 @@ function generateUserFoodId(): string {
   return `food:user:${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function sanitizeFoodIdSegment(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 80);
+}
+
+function generateExternalFoodId(food: ExternalFood): string {
+  const key = sanitizeFoodIdSegment(food.barcode ?? food.externalId);
+  return key.length > 0 ? `food:off:${key}` : generateUserFoodId();
+}
+
+function applyExternalFood(food: ExternalFood): void {
+  selectedExternal.value = food;
+  externalSource.value = food.source;
+  externalId.value = food.externalId;
+  name.value = food.name;
+  barcode.value = food.barcode ?? '';
+  brand.value = food.brand ?? '';
+  baseAmount.value = food.baseAmountG;
+  baseUnit.value = food.baseUnit;
+  kcal.value = food.kcal;
+  proteinG.value = food.proteinG;
+  carbsG.value = food.carbsG;
+  fatG.value = food.fatG;
+  fiberG.value = food.fiberG;
+}
+
+async function searchExternal(): Promise<void> {
+  const query = externalQuery.value.trim();
+  const barcodeCandidate = query.replace(/[\s-]/g, '');
+  selectedExternal.value = null;
+  externalSource.value = null;
+  externalId.value = null;
+  externalResults.value = [];
+  if (query.length === 0) {
+    return;
+  }
+  searchingExternal.value = true;
+  try {
+    if (/^\d{8,14}$/.test(barcodeCandidate)) {
+      const found = await openFoodFactsService.findByBarcode({
+        locale: props.locale,
+        barcode: barcodeCandidate,
+      });
+      externalResults.value = found ? [found] : [];
+      if (!found) {
+        barcode.value = barcodeCandidate;
+      }
+      return;
+    }
+    externalResults.value = await openFoodFactsService.searchFoods({
+      locale: props.locale,
+      query,
+      pageSize: 20,
+    });
+  } catch (err) {
+    Notify.create({
+      message: t('nutrition.off.connectionError'),
+      color: 'negative',
+      position: 'bottom',
+    });
+    void err;
+  } finally {
+    searchingExternal.value = false;
+  }
+}
+
+function buildFoodSnapshot(id: string): Food {
+  return {
+    id,
+    origin: 'custom',
+    externalSource: externalSource.value,
+    externalId: externalId.value,
+    barcode: barcode.value.trim().length > 0 ? barcode.value.trim() : null,
+    brand: brand.value.trim().length > 0 ? brand.value.trim() : null,
+    baseAmountG: baseAmount.value,
+    baseUnit: baseUnit.value,
+    kcal: kcal.value,
+    proteinG: proteinG.value,
+    carbsG: carbsG.value,
+    fatG: fatG.value,
+    fiberG: fiberG.value,
+    createdAt: editingCustom.value?.createdAt ?? '',
+    updatedAt: editingCustom.value?.updatedAt ?? '',
+  };
+}
+
 async function save(): Promise<void> {
   if (Object.keys(errors.value).length > 0) return;
   saving.value = true;
   try {
     const conn = await getDatabase();
     if (props.editingId) {
+      const food = buildFoodSnapshot(props.editingId);
       await nutritionService.updateCustomFood(conn, {
         id: props.editingId,
         name: name.value.trim(),
         locale: props.locale,
-        baseAmountG: baseAmount.value,
-        baseUnit: baseUnit.value,
-        kcal: kcal.value,
-        proteinG: proteinG.value,
-        carbsG: carbsG.value,
-        fatG: fatG.value,
-        fiberG: fiberG.value,
-      });
-      emit('saved', { ...(editingCustom.value ?? {}), id: props.editingId } as Food);
-      Notify.create({
-        message: t('common.save'),
-        color: 'positive',
-        position: 'bottom',
-        timeout: 1500,
-      });
-    } else {
-      const id = generateUserFoodId();
-      const food = await nutritionService.createCustomFood(conn, {
-        id,
-        name: name.value.trim(),
-        locale: props.locale,
+        externalSource: food.externalSource,
+        externalId: food.externalId,
+        barcode: food.barcode,
+        brand: food.brand,
         baseAmountG: baseAmount.value,
         baseUnit: baseUnit.value,
         kcal: kcal.value,
@@ -314,6 +476,32 @@ async function save(): Promise<void> {
         fiberG: fiberG.value,
       });
       emit('saved', food);
+      Notify.create({
+        message: t('common.save'),
+        color: 'positive',
+        position: 'bottom',
+        timeout: 1500,
+      });
+    } else {
+      const id = selectedExternal.value ? generateExternalFoodId(selectedExternal.value) : generateUserFoodId();
+      const snapshot = buildFoodSnapshot(id);
+      const createdFood = await nutritionService.createCustomFood(conn, {
+        id,
+        name: name.value.trim(),
+        locale: props.locale,
+        externalSource: snapshot.externalSource,
+        externalId: snapshot.externalId,
+        barcode: snapshot.barcode,
+        brand: snapshot.brand,
+        baseAmountG: snapshot.baseAmountG,
+        baseUnit: snapshot.baseUnit,
+        kcal: snapshot.kcal,
+        proteinG: snapshot.proteinG,
+        carbsG: snapshot.carbsG,
+        fatG: snapshot.fatG,
+        fiberG: snapshot.fiberG,
+      });
+      emit('saved', createdFood);
       Notify.create({
         message: t('common.save'),
         color: 'positive',
@@ -394,6 +582,19 @@ async function doDelete(): Promise<void> {
     gap: 12px;
   }
 
+  &__lookup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__results {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--amilio-border);
+    border-radius: 12px;
+  }
+
   &__row {
     display: flex;
     gap: 12px;
@@ -401,6 +602,11 @@ async function doDelete(): Promise<void> {
   }
 
   &__amount {
+    flex: 1;
+  }
+
+  &__barcode,
+  &__brand {
     flex: 1;
   }
 

@@ -8,6 +8,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   deleteFood,
   findFoodById,
+  findFoodByBarcode,
+  findFoodByExternalIdentity,
   insertFood,
   listAllOfficialFoodIds,
   listCustomFoods,
@@ -71,6 +73,24 @@ const CUSTOM_AVOCADO: SeedFood = {
   fiberG: 7,
   createdAt: '2026-02-01T00:00:00.000Z',
   updatedAt: '2026-02-01T00:00:00.000Z',
+};
+
+const EXTERNAL_CEREAL: SeedFood = {
+  id: 'food:off:7622210449283',
+  origin: 'custom',
+  externalSource: 'open_food_facts',
+  externalId: '7622210449283',
+  barcode: '7622210449283',
+  brand: 'Nesfit',
+  baseAmountG: 100,
+  baseUnit: 'g',
+  kcal: 389,
+  proteinG: 8,
+  carbsG: 78,
+  fatG: 5,
+  fiberG: 7,
+  createdAt: '2026-02-10T00:00:00.000Z',
+  updatedAt: '2026-02-10T00:00:00.000Z',
 };
 
 async function seedFood(db: TestDb, food: SeedFood): Promise<void> {
@@ -140,6 +160,13 @@ describe('food repo', () => {
     expect(results.map((r) => r.id)).toContain('food:rice_white');
   });
 
+  it('searchFoods matches a barcode when the translation search misses', async () => {
+    await insertFoodRow(db, EXTERNAL_CEREAL);
+    await insertFoodTranslationRow(db, EXTERNAL_CEREAL.id, 'en', 'Cereal', 'cereal');
+    const results = await searchFoods(db.conn, { locale: 'en', query: '7622210449283' });
+    expect(results.map((r) => r.id)).toContain(EXTERNAL_CEREAL.id);
+  });
+
   it('searchFoods returns [] for an empty query', async () => {
     const results = await searchFoods(db.conn, { locale: 'en', query: '   ' });
     expect(results).toEqual([]);
@@ -200,6 +227,24 @@ describe('food repo', () => {
       'SELECT food_id FROM meal_item WHERE food_id IS NULL',
     );
     expect(items.length).toBeGreaterThan(0);
+  });
+
+  it('findFoodByBarcode returns the matching row', async () => {
+    await insertFoodRow(db, EXTERNAL_CEREAL);
+    const row = await findFoodByBarcode(db.conn, '7622210449283');
+    expect(row?.id).toBe(EXTERNAL_CEREAL.id);
+    expect(row?.externalSource).toBe('open_food_facts');
+  });
+
+  it('findFoodByExternalIdentity returns the matching row', async () => {
+    await insertFoodRow(db, EXTERNAL_CEREAL);
+    const row = await findFoodByExternalIdentity(
+      db.conn,
+      'open_food_facts',
+      '7622210449283',
+    );
+    expect(row?.id).toBe(EXTERNAL_CEREAL.id);
+    expect(row?.barcode).toBe('7622210449283');
   });
 });
 
