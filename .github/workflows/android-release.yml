@@ -37,11 +37,6 @@ jobs:
       - name: Build Quasar and sync Android
         run: pnpm cap:sync
 
-      - name: Decode signing keystore
-        working-directory: src-capacitor/android
-        run: |
-          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
-
       - name: Set Android version
         working-directory: src-capacitor/android/app
         run: |
@@ -49,6 +44,11 @@ jobs:
           version_name="1.0.${{ github.run_number }}"
           sed -i "s/versionCode .*/versionCode ${version_code}/" build.gradle
           sed -i "s/versionName \".*\"/versionName \"${version_name}\"/" build.gradle
+
+      - name: Decode signing keystore
+        working-directory: src-capacitor/android/app
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
 
       - name: Build release APK
         working-directory: src-capacitor/android

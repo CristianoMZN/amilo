@@ -14,7 +14,7 @@
     "typecheck": "vue-tsc --noEmit",
     "dev": "quasar dev",
     "build": "quasar build",
-    "cap:sync": "pnpm build && cap sync android",
+    "cap:sync": "pnpm build && cd src-capacitor && ./node_modules/.bin/cap sync android",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
