@@ -2,7 +2,7 @@ import type { MessageSchema } from '../schema';
 
 const en: MessageSchema = {
   app: {
-    name: 'Amilio',
+    name: 'Amilo',
     tagline: 'Your local companion for nutrition and training',
   },
   nav: {
@@ -53,7 +53,7 @@ const en: MessageSchema = {
   },
   onboarding: {
     welcome: {
-      title: 'Welcome to Amilio',
+      title: 'Welcome to Amilo',
       subtitle: 'Track your nutrition, training and progress, fully on your device.',
       cta: 'Get started',
     },
@@ -129,7 +129,7 @@ const en: MessageSchema = {
       goalLabel: 'Goal',
       activityLabel: 'Activity',
       estimateNotice: 'Metabolic values are estimates, not clinical measurements.',
-      finish: 'Enter Amilio',
+      finish: 'Enter Amilo',
     },
     errors: {
       nameRequired: 'Please tell us how to greet you.',

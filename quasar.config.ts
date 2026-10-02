@@ -86,7 +86,7 @@ export default defineConfig((/* ctx */) => {
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
       config: {
-        dark: true, // Amilio is dark-mode first; the brand reads best on graphite
+        dark: true, // Amilo is dark-mode first; the brand reads best on graphite
       },
 
       // iconSet: 'material-icons', // Quasar icon set
@@ -196,7 +196,7 @@ export default defineConfig((/* ctx */) => {
       builder: {
         // https://www.electron.build/configuration
 
-        appId: 'amilio',
+        appId: 'amilo',
       },
     },
 

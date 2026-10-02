@@ -1,4 +1,4 @@
-// Amilio strict domain types — single source of truth.
+// Amilo strict domain types — single source of truth.
 // Keep this file free of Vue, Pinia, Capacitor or Quasar imports.
 
 /** Locale codes actually shipped in the app (no regional variants). */

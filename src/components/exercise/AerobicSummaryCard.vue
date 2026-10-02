@@ -107,7 +107,7 @@ const { t } = useI18n();
  *    `"0.5 min"`.
  *
  * The measurement-system parameter is reserved for future imperial-time
- * support — Amilio currently always renders aerobic durations in minutes.
+ * support — Amilo currently always renders aerobic durations in minutes.
  */
 function formatDurationMinutes(minutes: number): string {
   const safe = Number.isFinite(minutes) ? Math.max(0, minutes) : 0;

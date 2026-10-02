@@ -1,9 +1,9 @@
 // Quasar SCSS (& Sass) Variables
 // --------------------------------------------------
-// Amilio brand identity: graphite + yellow.
+// Amilo brand identity: graphite + yellow.
 //
 // The actual palette is also exposed as Quasar brand colors:
-//   $primary  = yellow (Amilio Yellow Strong, EAB308)
+//   $primary  = yellow (Amilo Yellow Strong, EAB308)
 //   $secondary = graphite (18181B)
 //   $accent  = yellow primary (FACC15)
 //
@@ -21,7 +21,7 @@ $negative: #ef4444;
 $info: #38bdf8;
 $warning: #f59e0b;
 
-// Amilio semantic tokens (used via CSS vars on body — see app.scss)
+// Amilo semantic tokens (used via CSS vars on body — see app.scss)
 :root {
   --amilio-yellow-primary: #facc15;
   --amilio-yellow-strong: #eab308;

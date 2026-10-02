@@ -1,4 +1,4 @@
-// Public service contract for the Amilio exercise + aerobic module.
+// Public service contract for the Amilo exercise + aerobic module.
 //
 // Vue components and Pinia stores depend on this TypeScript interface
 // (not on the implementation). One real implementation lives in

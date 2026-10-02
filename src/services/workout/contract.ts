@@ -1,4 +1,4 @@
-// Public service contract for the Amilio workout module (sheets, sessions,
+// Public service contract for the Amilo workout module (sheets, sessions,
 // planned exercises, performed workouts, performed exercises + sets).
 //
 // Vue components and Pinia stores depend on this TypeScript interface

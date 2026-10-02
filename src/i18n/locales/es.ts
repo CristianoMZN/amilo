@@ -2,14 +2,14 @@ import type { MessageSchema } from '../schema';
 
 const es: MessageSchema = {
   app: {
-    name: 'Amilio',
+    name: 'Amilo',
     tagline: 'Tu compañero local para nutrición y entrenamiento',
   },
   nav: {
     home: 'Inicio',
     nutrition: 'Nutrición',
-    exercise: 'Exercises',
-    workout: 'Workouts',
+    exercise: 'Ejercicios',
+    workout: 'Entrenamientos',
     manage: 'Gestionar',
     onboarding: 'Comenzar',
     settings: 'Ajustes',
@@ -53,7 +53,7 @@ const es: MessageSchema = {
   },
   onboarding: {
     welcome: {
-      title: 'Bienvenido a Amilio',
+      title: 'Bienvenido a Amilo',
       subtitle: 'Registra tu nutrición, tu entrenamiento y tu progreso, todo en tu dispositivo.',
       cta: 'Comenzar',
     },
@@ -129,7 +129,7 @@ const es: MessageSchema = {
       goalLabel: 'Objetivo',
       activityLabel: 'Actividad',
       estimateNotice: 'Los valores metabólicos son estimaciones, no mediciones clínicas.',
-      finish: 'Entrar a Amilio',
+      finish: 'Entrar a Amilo',
     },
     errors: {
       nameRequired: 'Indícanos cómo saludarte.',

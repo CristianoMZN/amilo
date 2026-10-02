@@ -324,7 +324,7 @@ class DevStubConnection implements DbConnection {
       const replacement = detectInsertConflict(upper);
       if (replacement === 'replace') {
         console.warn(
-          `[Amilio dev-stub] INSERT OR REPLACE is not supported; treating as OR IGNORE. ` +
+          `[Amilo dev-stub] INSERT OR REPLACE is not supported; treating as OR IGNORE. ` +
             `Statement: ${trimmed}`,
         );
       }
@@ -463,7 +463,7 @@ class DevStubConnection implements DbConnection {
     const unsupported = detectUnsupportedFeatures(upper);
     if (unsupported) {
       console.warn(
-        `[Amilio dev-stub] SELECT contains unsupported feature ("${unsupported}"). ` +
+        `[Amilo dev-stub] SELECT contains unsupported feature ("${unsupported}"). ` +
           `Statement: ${trimmed}`,
       );
       return [];
@@ -829,14 +829,14 @@ export function createConnection(): Promise<DbConnection> {
   }
   if (import.meta.env.DEV) {
     console.warn(
-      '[Amilio] SQLite native plugin unavailable in browser dev. Using in-memory stub. ' +
+      '[Amilo] SQLite native plugin unavailable in browser dev. Using in-memory stub. ' +
         'Real persistence only happens in the Android build.',
     );
     return Promise.resolve(new DevStubConnection());
   }
   return Promise.reject(
     new Error(
-      '[Amilio] SQLite native plugin is required outside the dev environment. ' +
+      '[Amilo] SQLite native plugin is required outside the dev environment. ' +
         'Run the app on an Android device or emulator.',
     ),
   );
