@@ -52,3 +52,25 @@ The application is a Quasar Vite + Vue 3 app. Domain rules live in
 `src/domain`, persistence is organized into `src/database` and
 `src/repositories`, shared state uses Pinia in `src/stores`, and translated
 interface text lives in `src/i18n`.
+
+## Android release
+
+Pushing or merging to `main` triggers `.github/workflows/android-release.yml`,
+which builds a signed release APK and publishes it to GitHub Releases.
+
+Required repository secrets (set under **Settings > Secrets and variables >
+Actions**):
+
+- `RELEASE_KEYSTORE_BASE64` — Base64-encoded signing keystore (`.jks` or
+  `.keystore`). Generate with:
+  ```bash
+  keytool -genkey -v -keystore release.keystore -alias amilokey \
+    -keyalg RSA -keysize 2048 -validity 10000
+  base64 -w 0 release.keystore > release.keystore.b64
+  ```
+- `RELEASE_KEY_ALIAS` — key alias used when creating the keystore.
+- `RELEASE_KEY_PASSWORD` — key password.
+- `RELEASE_STORE_PASSWORD` — keystore password.
+
+Keep the keystore file and passwords out of the repository; they are only used
+inside the workflow run.
