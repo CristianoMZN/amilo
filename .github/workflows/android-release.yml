@@ -1,0 +1,84 @@
+name: Android Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Quasar and sync Android
+        run: pnpm cap:sync
+
+      - name: Set Android version
+        working-directory: src-capacitor/android/app
+        run: |
+          version_code="${{ github.run_number }}"
+          version_name="1.0.${{ github.run_number }}"
+          sed -i "s/versionCode .*/versionCode ${version_code}/" build.gradle
+          sed -i "s/versionName \".*\"/versionName \"${version_name}\"/" build.gradle
+
+      - name: Decode signing keystore
+        working-directory: src-capacitor/android/app
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+
+      - name: Build release APK
+        working-directory: src-capacitor/android
+        run: ./gradlew assembleRelease
+        env:
+          RELEASE_STORE_FILE: release.keystore
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+
+      - name: Rename APK
+        working-directory: src-capacitor/android
+        run: |
+          mkdir -p release
+          cp app/build/outputs/apk/release/app-release.apk "release/amilo-nutrition-v1.0.${{ github.run_number }}.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: amilo-apk
+          path: src-capacitor/android/release/amilo-nutrition-v*.apk
+
+      - name: Create Git tag
+        run: |
+          git tag "v1.0.${{ github.run_number }}"
+          git push origin "v1.0.${{ github.run_number }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Amilo v1.0.${{ github.run_number }}
+          files: src-capacitor/android/release/amilo-nutrition-v*.apk
