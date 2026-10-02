@@ -34,3 +34,8 @@ yarn-error.log*
 
 # deepwork progress (session-local state)
 .slim/deepwork/
+
+# Signing keystores
+*.jks
+*.keystore
+release.keystore
